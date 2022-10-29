@@ -1,23 +1,35 @@
+#начиная с какой версии сборка будет собираться
 cmake_minimum_required(VERSION 3.14)
 
+#название проекта
 project(EM_project VERSION 0.1 LANGUAGES CXX)
 
+#
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+#
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+#начиная с какой версии сборка будет собираться
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#поиск системой сборки файлов
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS QuickWidgets)
 
+
+#из каких языков проект
 set(TS_FILES EM_project_en_GB.ts)
 
+#из каких файлов собирается проект
 set(PROJECT_SOURCES
         main.cpp
+        menu.cpp
+        menu.h
         qml.qrc
         ${TS_FILES}
 )
@@ -49,9 +61,12 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
+#подключение библиотек
 target_link_libraries(EM_project
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick
+  Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::QuickWidgets)
 
+#сборка под разные ОС
 set_target_properties(EM_project PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
@@ -60,10 +75,12 @@ set_target_properties(EM_project PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+#
 install(TARGETS EM_project
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+#сборка проекта от версии 6
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_import_qml_plugins(EM_project)
     qt_finalize_executable(EM_project)
