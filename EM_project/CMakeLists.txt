@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
         menu.cpp
         menu.h
         qml.qrc
+        cppconnection.h
+        cppconnection.cpp
         ${TS_FILES}
 )
 

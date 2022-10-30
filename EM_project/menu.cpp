@@ -3,21 +3,23 @@
 
 Menu::Menu(QWidget* pwgt/*=0*/) : QWidget(pwgt)
 {
-
-    QQuickWidget* pv = new QQuickWidget(QUrl("qrc:/main.qml") );
+    QQuickWidget* pv = new QQuickWidget(QUrl("qrc:/Button.qml") );
     QVBoxLayout* pvbx = new QVBoxLayout;
     pvbx->addWidget(pv);
-    setLayout(pvbx);
+    this->setLayout(pvbx);
+    /*
+    QQuickItem* pqiRoot = pv->rootObject();
+    pqiRoot->setProperty ( "color", "yellow");
     //pv->show();
-
+    */
 
     QQuickItem* pqiRoot = pv->rootObject();
     if(pqiRoot)
-        pqiRoot->setProperty ( "color", "yellow");
-    QObject* pObjText = pqiRoot->findChild<QObject*>("text");
+      pqiRoot->setProperty ( "color", "yellow");
+      QObject* pObjText = pqiRoot->findChild<QObject*>("lext");
     if(pObjText){
         pObjText->setProperty ( "text", "Good bye, world!") ;
-        pObjText->setProperty ( "color", "Bluе");
+        pObjText->setProperty ( "color", "blue");
 
         QVariant varRet;
         QMetaObject::invokeMethod(pObjText,
@@ -28,6 +30,8 @@ Menu::Menu(QWidget* pwgt/*=0*/) : QWidget(pwgt)
         qDebug () << varRet;
 
     }
+
+
 
 
 }
