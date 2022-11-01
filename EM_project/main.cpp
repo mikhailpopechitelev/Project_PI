@@ -44,14 +44,7 @@ int main(int argc, char *argv[])
     if  (pcmdQuiteButton){
         QObject::connect(pcmdQuiteButton,SIGNAL(quiteClicked()),&cc,SLOT(slotQuite()));
     }
-    QObject* pcmdInfoButton = pobj->findChild<QObject*>("InfoButton");
-    if  (pcmdInfoButton){
-        QObject::connect(pcmdInfoButton,SIGNAL(infoclicked(QString)),&cc,SLOT(slotInfo(QString)));
-    }
-    QObject* pcmdChangeColorButton = pobj->findChild<QObject*>("ColorChanButton");
-    if  (pcmdChangeColorButton){
-        QObject::connect(pcmdChangeColorButton,SIGNAL(colorChanClicked()),&cc,SLOT(slotChangeColor()));
-    }
+
 
     return app.exec();
 }
@@ -66,16 +59,30 @@ int main(int argc, char *argv[])
 
 
 /*
-QQmlApplicationEngine engine;
 
-const QUrl url(QStringLiteral("qrc:/main.qml"));
-QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                 &app, [url](QObject *obj, const QUrl &objUrl) {
-    if (!obj && url == objUrl)
-        QCoreApplication::exit(-1);
-}, Qt::QueuedConnection);
+    QQmlApplicationEngine engine;
+
+    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
 
 
-engine.load(url);
+    engine.load(url);
+*/
+
+
+/*
+    QObject* pcmdInfoButton = pobj->findChild<QObject*>("InfoButton");
+    if  (pcmdInfoButton){
+        QObject::connect(pcmdInfoButton,SIGNAL(infoclicked(QString)),&cc,SLOT(slotInfo(QString)));
+    }
+    QObject* pcmdChangeColorButton = pobj->findChild<QObject*>("ColorChanButton");
+    if  (pcmdChangeColorButton){
+        QObject::connect(pcmdChangeColorButton,SIGNAL(colorChanClicked()),&cc,SLOT(slotChangeColor()));
+    }
 
 */
+
