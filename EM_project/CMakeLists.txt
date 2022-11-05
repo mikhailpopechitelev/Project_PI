@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.5)
 
 project(EM_project VERSION 0.1 LANGUAGES CXX)
 
@@ -11,14 +11,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
 set(TS_FILES EM_project_en_GB.ts)
 
 set(PROJECT_SOURCES
         main.cpp
-        qml.qrc
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui
         ${TS_FILES}
 )
 
@@ -42,15 +44,14 @@ else()
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(EM_project
-          ${PROJECT_SOURCES}
+            ${PROJECT_SOURCES}
         )
     endif()
 
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(EM_project
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(EM_project PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -65,6 +66,5 @@ install(TARGETS EM_project
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_import_qml_plugins(EM_project)
     qt_finalize_executable(EM_project)
 endif()
