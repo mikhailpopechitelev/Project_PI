@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         main.cpp
         em_proj.h
         em_proj.cpp
+        parser.h
+        parser.cpp
         ${TS_FILES}
 )
 

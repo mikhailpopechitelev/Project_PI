@@ -3,6 +3,10 @@
 #include <QPushButton>
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include <QComboBox>
+#include <QLayout>
+#include <QStackedWidget>
+
 
 class EM_proj : public QWidget
 {
