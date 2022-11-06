@@ -1,5 +1,6 @@
 #include <QApplication>
 #include "em_proj.h"
+#include "menu.h"
 #include <QCoreApplication>
 #include <QLocale>
 #include <QTranslator>
@@ -18,7 +19,10 @@ int main(int argc, char *argv[])
         }
     }
     EM_proj main;
+    main.resize(800,600);
     main.show();
+    //Menu menu;
+    //menu.show();
 
     return a.exec();
 }

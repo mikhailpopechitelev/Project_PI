@@ -1,44 +1,56 @@
 #include "em_proj.h"
-
+#include "menu.h"
+#include "startwidget.h"
+//#include "autors.h"
+//#include "startwidget.h"
 
 EM_proj::EM_proj(QWidget *parent)
     : QWidget{parent}
 {
 
-    QVBoxLayout* buttonBox = new QVBoxLayout();
-
-    QPushButton* start = new QPushButton("Start");
-    QPushButton* authors = new QPushButton("Authors");
-    QPushButton* quit = new QPushButton("Quit");
-    buttonBox->addWidget(start);
-    buttonBox->addWidget(authors);
-    buttonBox->addWidget(quit);
-    QWidget* menu = new QWidget();
-    menu->setLayout(buttonBox);
-    //this->setLayout(buttonBox);
-    menu->resize(1920,1080);
-
-    QWidget* startWidget = new QWidget();
-    QWidget* authorsWidget = new QWidget();
-    //QWidget*  = new QWidget();
+    Menu* startmenu = new Menu();
+    Authors* authorsWidget = new Authors();
+    StartWidget* startWidget = new StartWidget();
 
 
-    QStackedWidget* stack = new QStackedWidget();
-    stack->addWidget(menu);
-    stack->addWidget(startWidget);
+    connect(startmenu->start,SIGNAL(clicked()),this,SLOT(slotButtonStart()));
+    //Создание и заполнение стека
+    //QStackedWidget* stack = new QStackedWidget();
+    stack->addWidget(startmenu);
     stack->addWidget(authorsWidget);
+    stack->addWidget(startWidget);
 
 
 
+    //размещение стека в окне
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addWidget(stack);
     this->setLayout(layout);
 
-
+    //stack->removeWidget(startmenu);
+    /*
     QComboBox* pageComboBox = new QComboBox();
     pageComboBox->addItem(tr("page1"));
     pageComboBox->addItem(tr("page2"));
     pageComboBox->addItem(tr("page3"));
 
     connect(pageComboBox, &QComboBox::activated, stack, &QStackedWidget::setCurrentIndex);
+    */
+
 }
+
+void EM_proj::slotButtonStart(){
+    //wgt.update()
+    qDebug() << stack->count();
+    /*
+    stack->addWidget(&autorsWidget);
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->addWidget(stack);
+    this->repaint();
+    this->setLayout(layout);
+    //stack->addWidget(&autorsWidget);
+    */
+    stack->addWidget(&autorsWidget);
+    stack->setCurrentWidget(&autorsWidget);
+}
+

@@ -30,6 +30,12 @@ set(PROJECT_SOURCES
         em_proj.cpp
         parser.h
         parser.cpp
+        menu.h
+        menu.cpp
+        autors.h
+        autors.cpp
+        startwidget.h
+        startwidget.cpp
         ${TS_FILES}
 )
 
