@@ -34,7 +34,8 @@ set(PROJECT_SOURCES
         autors.cpp
         startwidget.h
         startwidget.cpp
-	Graph_parser.cpp
+        graph_parser.h
+        graph_parser.cpp
         ${TS_FILES}
 )
 

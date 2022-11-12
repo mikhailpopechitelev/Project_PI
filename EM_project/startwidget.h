@@ -19,8 +19,9 @@ public:
     QPushButton* buttonStart = new QPushButton("Start");
     QPushButton* buttonChooseFile = new QPushButton("Choose file");
 
-    QGraphicsScene* scen = new QGraphicsScene(QRectF(0,0,500,500));
+    QGraphicsScene* scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
     QGraphicsView* view = new  QGraphicsView(scen);
+
 
     explicit StartWidget(QWidget *parent = nullptr);
 

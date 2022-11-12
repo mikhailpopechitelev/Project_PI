@@ -20,11 +20,13 @@ public:
     StartWidget* startWidget = new StartWidget();
     Authors* authorsWidget = new Authors();
 
-    void loadfile(const std::string& url);
+    std::vector<std::pair<int,int>> loadfile(const std::string& url);
     void pushStack(QWidget* wgt);
     void popStack();
     QGraphicsEllipseItem* CreateItamVerties(const int& x,const int& y,const int& r,const QPen& pen, const QBrush& brush);
-    QGraphicsItem* CreateItamEdges(const int& from,const int& to);
+    QGraphicsLineItem* CreateItamEdges(const int& x1,const int& y1,
+                                   const int& x2,const int& y2,
+                                   const QPen& pen);
 
     explicit EM_proj(QWidget *parent = nullptr);
 
