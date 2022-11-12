@@ -2,6 +2,7 @@
 #define EM_PROJ_H
 #include "menu.h"
 #include "autors.h"
+#include "startwidget.h"
 #include <QPushButton>
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -12,11 +13,13 @@
 
 class EM_proj : public QWidget
 {
+
     Q_OBJECT
 public:
-    QStackedWidget* stack = new QStackedWidget();
-    Menu menu;
-    Authors autorsWidget;
+    QStackedWidget* stack;
+    Menu* startmenu = new Menu();
+    StartWidget* startWidget = new StartWidget();
+    Authors* authorsWidget = new Authors();
     /*
     enum class eState{
         MENU,
@@ -30,28 +33,36 @@ public:
     };
 
     */
+
+
+    void pushStack(QWidget* wgt);
+    void popStack();
+    friend void popStackS(EM_proj proj);
+
     explicit EM_proj(QWidget *parent = nullptr);
 
+public:
     void sendSignalButton(){
         emit signalFromButton("start");
     }
+    void sendSignalButtonAutors(){
+        emit signalFromButton("Authors");
+    };
+    void sendButtonQuite(){
+        emit signalFromButton("Quit");
+    };
+    void sendButtonChoose(){
+        emit signalFromButton("Choose file");
+    }
 signals:
     void signalFromButton(QString str);
-/*
-private:
-    void _proccessing();
-    void _draw();
-
-private:
-    eState mState{eState::MENU};
-    eMenu mCurrentMenu;
-    std::vector<std::pair<eMenu,std::string>> mvMenu;
-    */
 
 private slots:
     void slotButtonStart();
-    //void SlotButtonAutors();
-    //void SlotButtonQuite();
+    void SlotButtonAutors();
+    void SlotButtonQuite();
+    void slotButtonBack();
+    void slotButtonChoose();
 };
 
 #endif // EM_PROJ_H

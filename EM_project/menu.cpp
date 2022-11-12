@@ -10,5 +10,4 @@ Menu::Menu(QWidget *parent)
     buttonBox->addWidget(quit);
     this->setLayout(buttonBox);
     this->resize(800,600);
-
 }

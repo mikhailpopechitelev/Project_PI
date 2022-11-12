@@ -1,56 +1,61 @@
 #include "em_proj.h"
 #include "menu.h"
 #include "startwidget.h"
-//#include "autors.h"
-//#include "startwidget.h"
+#include <QFileDialog>
+#include <QtCore>
+
 
 EM_proj::EM_proj(QWidget *parent)
     : QWidget{parent}
 {
-
-    Menu* startmenu = new Menu();
-    Authors* authorsWidget = new Authors();
-    StartWidget* startWidget = new StartWidget();
-
-
-    connect(startmenu->start,SIGNAL(clicked()),this,SLOT(slotButtonStart()));
-    //Создание и заполнение стека
-    //QStackedWidget* stack = new QStackedWidget();
+    //Заполнение стека
+    stack = new QStackedWidget();
     stack->addWidget(startmenu);
-    stack->addWidget(authorsWidget);
-    stack->addWidget(startWidget);
 
+    //подключение кнопок приложения
+    connect(startmenu->start,SIGNAL(clicked()),this,SLOT(slotButtonStart()));
+    connect(startmenu->authors,SIGNAL(clicked()),this,SLOT(SlotButtonAutors()));
+    connect(startmenu->quit,SIGNAL(clicked()),this,SLOT(SlotButtonQuite()));
+    connect(startWidget->buttonBack,SIGNAL(clicked()),this,SLOT(slotButtonBack()));
+    connect(startWidget->buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
 
-
-    //размещение стека в окне
+    connect(authorsWidget->buttonBack,SIGNAL(clicked()),this,SLOT(slotButtonBack()));
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addWidget(stack);
     this->setLayout(layout);
-
-    //stack->removeWidget(startmenu);
-    /*
-    QComboBox* pageComboBox = new QComboBox();
-    pageComboBox->addItem(tr("page1"));
-    pageComboBox->addItem(tr("page2"));
-    pageComboBox->addItem(tr("page3"));
-
-    connect(pageComboBox, &QComboBox::activated, stack, &QStackedWidget::setCurrentIndex);
-    */
-
 }
 
+void EM_proj::slotButtonBack(){
+    QWidget* wgt = stack->currentWidget();
+    stack->removeWidget(wgt);
+    stack->setCurrentWidget(stack->currentWidget());
+}
+
+//методы заполнения стека и удаления из стека
+void EM_proj::pushStack(QWidget* wgt){
+    stack->addWidget(wgt);
+}
+void EM_proj::popStack(){
+    QWidget* wgt = stack->currentWidget();
+    stack->removeWidget(wgt);
+}
+
+//реализация словот кнопок
 void EM_proj::slotButtonStart(){
-    //wgt.update()
-    qDebug() << stack->count();
-    /*
-    stack->addWidget(&autorsWidget);
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->addWidget(stack);
-    this->repaint();
-    this->setLayout(layout);
-    //stack->addWidget(&autorsWidget);
-    */
-    stack->addWidget(&autorsWidget);
-    stack->setCurrentWidget(&autorsWidget);
-}
+    stack->addWidget(startWidget);
+    stack->setCurrentWidget(startWidget);
 
+}
+void EM_proj::SlotButtonAutors(){
+    stack->addWidget(authorsWidget);
+    stack->setCurrentWidget(authorsWidget);
+}
+void EM_proj::SlotButtonQuite(){
+    qApp->quit();
+}
+void EM_proj::slotButtonChoose(){
+    QString url;
+    url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
+                                       "All Files (*.*);; GRAPH (*.graph);");
+
+}

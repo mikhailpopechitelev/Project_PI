@@ -28,14 +28,13 @@ set(PROJECT_SOURCES
         main.cpp
         em_proj.h
         em_proj.cpp
-        parser.h
-        parser.cpp
         menu.h
         menu.cpp
         autors.h
         autors.cpp
         startwidget.h
         startwidget.cpp
+	Graph_parser.cpp
         ${TS_FILES}
 )
 

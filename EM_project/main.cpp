@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "em_proj.h"
-#include "menu.h"
 #include <QCoreApplication>
 #include <QLocale>
 #include <QTranslator>
