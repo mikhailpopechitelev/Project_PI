@@ -1,6 +1,7 @@
 #include "em_proj.h"
 #include "menu.h"
 #include "startwidget.h"
+//#include "Graph_parser.cpp"
 #include <QFileDialog>
 #include <QtCore>
 
@@ -57,5 +58,27 @@ void EM_proj::slotButtonChoose(){
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
                                        "All Files (*.*);; GRAPH (*.graph);");
+    std::string URL = url.toStdString();
+    loadfile(URL);
+}
+void EM_proj::loadfile(const std::string& URL){
+    startWidget->view->setRenderHint(QPainter::Antialiasing,true);
 
+    QGraphicsEllipseItem* MyItem = CreateItamVerties(10,10,15,QPen(Qt::black,1,Qt::SolidLine),QBrush(Qt::blue));
+    startWidget->scen->addItem(MyItem);
+    MyItem->setFlags(QGraphicsItem::ItemIsMovable);
+}
+
+/*
+QGraphicsItem* EM_proj::CreateItamEdges(const int& from,const int& to){
+    QGraphicsItem* MyItem = new QGraphicsItem(10,10);
+    return MyItem;
+}
+*/
+
+QGraphicsEllipseItem* EM_proj::CreateItamVerties(const int& x,const int& y, const int& r ,const QPen& pen, const QBrush& brush){
+    QGraphicsEllipseItem* MyItem = new QGraphicsEllipseItem(x,y,2*r,2*r);
+    MyItem->setPen(pen);
+    MyItem->setBrush(brush);
+    return MyItem;
 }

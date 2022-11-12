@@ -6,6 +6,10 @@
 #include <QComboBox>
 #include <QLayout>
 #include <QStackedWidget>
+#include <QGraphicsView>
+#include <QGraphicsEllipseItem>
+
+
 
 class StartWidget: public QWidget
 {
@@ -14,10 +18,14 @@ public:
     QPushButton* buttonBack = new QPushButton("Back");
     QPushButton* buttonStart = new QPushButton("Start");
     QPushButton* buttonChooseFile = new QPushButton("Choose file");
+
+    QGraphicsScene* scen = new QGraphicsScene(QRectF(0,0,500,500));
+    QGraphicsView* view = new  QGraphicsView(scen);
+
     explicit StartWidget(QWidget *parent = nullptr);
 
 public:
-    void slotButtonQuite(){
+    void sendButtonQuite(){
         emit signalFromButton("Back");
     };
 signals:

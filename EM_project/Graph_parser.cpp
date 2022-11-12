@@ -164,20 +164,5 @@ std::vector<Edges> get_edges(const std::string& url) {
     }
     return mas_edges;
 };
-/*
-int main() {
 
-    std::vector<Edges> mas_edges = get_edges("C:\\Users\\user\\Desktop\\hui.graph");
-    
-    std::cout << mas_edges.size()<< "\n";
-    std::cout << 100000 * sizeof(mas_edges)/1024;
-    
-    for (size_t i = 0; i < mas_edges.size(); i++)
-    {
-        std::cout << mas_edges[i].get_name_from() << "   "<< mas_edges[i].get_x_from() <<"   "<< mas_edges[i].get_y_from()<< '\n';
-    }
-    
-    return 0;
 
-}
-*/

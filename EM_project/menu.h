@@ -16,6 +16,7 @@ public:
     QPushButton* start = new QPushButton("Start");
     QPushButton* authors = new QPushButton("Authors");
     QPushButton* quit = new QPushButton("Quit");
+
     explicit Menu(QWidget *parent = nullptr);
 
 signals:
