@@ -6,6 +6,7 @@
 #include <QtCore>
 #include <QDebug>
 
+//создание конструктора
 EM_proj::EM_proj(QWidget *parent)
     : QWidget{parent}
 {
@@ -26,12 +27,6 @@ EM_proj::EM_proj(QWidget *parent)
     this->setLayout(layout);
 }
 
-void EM_proj::slotButtonBack(){
-    QWidget* wgt = stack->currentWidget();
-    stack->removeWidget(wgt);
-    stack->setCurrentWidget(stack->currentWidget());
-}
-
 //методы заполнения стека и удаления из стека
 void EM_proj::pushStack(QWidget* wgt){
     stack->addWidget(wgt);
@@ -42,6 +37,11 @@ void EM_proj::popStack(){
 }
 
 //реализация словот кнопок
+void EM_proj::slotButtonBack(){
+    QWidget* wgt = stack->currentWidget();
+    stack->removeWidget(wgt);
+    stack->setCurrentWidget(stack->currentWidget());
+}
 void EM_proj::slotButtonStart(){
     stack->addWidget(startWidget);
     stack->setCurrentWidget(startWidget);
@@ -55,57 +55,101 @@ void EM_proj::SlotButtonQuite(){
     qApp->quit();
 }
 void EM_proj::slotButtonChoose(){
+
+
+    //получает ссылку на файл и приводит её к типу строки
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
                                        "All Files (*.*);; GRAPH (*.graph);");
     std::string URL = url.toStdString();
-    std::vector<std::pair<int,int>> mas =loadfile(URL);
-    startWidget->view->resetTransform();
+    if(URL != ""){
+        qDebug() << url;
 
+        //загружет изначальный граф в сцену
+        loadfile(URL);
 
-    int len_x =mas[0].second-mas[0].first; int len_y = mas[1].second-mas[1].first;
-    startWidget->scen->setSceneRect(mas[0].first,mas[1].first,
-            (len_x),(len_y));
+        //создает массив вершин и ребер находит минимальные точки
+        //устанавливает прямоугольник в минимальную точку графа по x и по y с длинами сторон len_x и len_y
+        //устанавливает граф по центру
+        std::pair<std::vector<Edges>,std::vector<Vertices>> masVE = getMasVE(URL);
+        std::vector<std::pair<int,int>> mas =findMinPointMaxPoint(masVE);
+        int len_x =mas[0].second-mas[0].first; int len_y = mas[1].second-mas[1].first; int min_x =mas[0].first; int min_y =mas[1].first;
+        startWidget->scen->setSceneRect(min_x,min_y,len_x,len_y);
 
-    int size_x = 1280; int size_y =900;
-    double scale = std::min((size_x/len_x),(size_y/len_y));
-    if(scale>=1){
-        qDebug()<<len_x <<"  "<<len_y;
-        startWidget->view->scale(scale*0.8,scale*0.8);
-    }else{
-        scale =std::max((len_x/size_x)+1,(len_y/size_y)+1);
-
-        qDebug()<<len_x <<"  "<<len_y;
-        startWidget->view->scale((1/scale),(1/scale));
+        startWidget->view->resetTransform();
+        //скалирует изображение в зависимости от размеров окна
+        int size_x = startWidget->view->width();; int size_y =startWidget->view->height();;
+        double scale = std::min((size_x/len_x),(size_y/len_y));
+        if(scale>=1){
+            startWidget->view->scale(scale*0.8,scale*0.8);
+        }else{
+            scale =std::max((len_x/size_x)+1,(len_y/size_y)+1);
+            startWidget->view->scale((1/scale),(1/scale));
+        }
     }
-    //startWidget->scen->setSceneRect(,0,100,-100);
+
 }
 
-
-std::vector<std::pair<int,int>> EM_proj::loadfile(const std::string& URL){
-    startWidget->scen->clear();
+//загрузка на сцену графа из файла
+void EM_proj::loadfile(const std::string& URL){
     startWidget->view->setRenderHint(QPainter::Antialiasing,true);
-
+    std::pair<std::vector<Edges>,std::vector<Vertices>> mas = getMasVE(URL);
     std::vector<std::pair<int,int>> final;
+    startWidget->scen->clear();
+    addScengraph(mas);
+}
+
+//получение масива вершин и ребер для графа
+std::pair<std::vector<Edges>,std::vector<Vertices>> EM_proj::getMasVE(const std::string& URL){
     Edges tmp =Edges();
     std::pair<std::vector<Edges>,std::vector<Vertices>> mas = tmp.get_ver_edges(URL);
-    //qDebug() << mas_edges.size() ;
+    return mas;
+}
+
+//создание ребра по начальной ,конечной точке и выбор стиля ребра
+QGraphicsLineItem* EM_proj::CreateItamEdges(const int& x1,const int& y1,
+                                            const int& x2,const int& y2,
+                                            const QPen& pen){
+    QGraphicsLineItem* MyItem = new QGraphicsLineItem(x1,y1,x2,y2);
+    MyItem->setPen(pen);
+    return MyItem;
+}
+
+//создвние вершины по её координатам, выбор контура и заливки
+QGraphicsEllipseItem* EM_proj::CreateItamVerties(const int& x,const int& y,
+                                                 const int& r ,const QPen& pen,
+                                                 const QBrush& brush){
+    QGraphicsEllipseItem* MyItem = new QGraphicsEllipseItem(x,y,2*r,2*r);
+    MyItem->setPen(pen);
+    MyItem->setBrush(brush);
+    return MyItem;
+}
+//добавление графа на сцену
+void EM_proj::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
     for (size_t i = 0; i < mas.first.size(); ++i) {
-        int x1 = mas.first[i].get_x_from();
-        int y1 = mas.first[i].get_y_from();
-        int x2 = mas.first[i].get_x_to();
-        int y2 = mas.first[i].get_y_to();
-        QGraphicsLineItem* MyItem = CreateItamEdges(x1,y1,x2,y2,QPen(Qt::black,4,Qt::SolidLine));
+        QGraphicsLineItem* MyItem = CreateItamEdges(mas.first[i].get_x_from(),
+                                                    mas.first[i].get_y_from(),
+                                                    mas.first[i].get_x_to(),
+                                                    mas.first[i].get_y_to(),
+                                                    QPen(Qt::black,4,Qt::SolidLine));
         startWidget->scen->addItem(MyItem);
-        //MyItem->setFlags(QGraphicsItem::ItemIsMovable);
+        //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
     }
     for (size_t i = 0; i < mas.second.size(); ++i) {
-        int x = mas.second[i].get_x();
-        int y = mas.second[i].get_y();
-        QGraphicsEllipseItem* MyItem = CreateItamVerties(x-15,y-15,15,QPen(Qt::black,1,Qt::SolidLine),QBrush(Qt::blue));
+        QGraphicsEllipseItem* MyItem = CreateItamVerties(mas.second[i].get_x()-15,
+                                                         mas.second[i].get_y()-15,
+                                                         15,
+                                                         QPen(Qt::black,1,Qt::SolidLine),
+                                                         QBrush(Qt::blue));
         startWidget->scen->addItem(MyItem);
-        //MyItem->setFlags(QGraphicsItem::ItemIsMovable);
+        //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения вершины
     }
+};
+
+//нахождения минимальных и максимальных точке на графе (чтобы потом его отцентровывать и масштабировать)
+std::vector<std::pair<int,int>> EM_proj::findMinPointMaxPoint(
+         std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
+    std::vector<std::pair<int,int>> final;
     int max_x =  mas.second[0].get_x();
     int min_x =  mas.second[0].get_x();
     int max_y =  mas.second[0].get_y();
@@ -127,19 +171,4 @@ std::vector<std::pair<int,int>> EM_proj::loadfile(const std::string& URL){
     final.push_back(std::pair(min_x,max_x));
     final.push_back(std::pair(min_y,max_y));
     return final;
-}
-
-QGraphicsLineItem* EM_proj::CreateItamEdges(const int& x1,const int& y1,
-                                            const int& x2,const int& y2,
-                                            const QPen& pen){
-    QGraphicsLineItem* MyItem = new QGraphicsLineItem(x1,y1,x2,y2);
-    MyItem->setPen(pen);
-    return MyItem;
-}
-
-QGraphicsEllipseItem* EM_proj::CreateItamVerties(const int& x,const int& y, const int& r ,const QPen& pen, const QBrush& brush){
-    QGraphicsEllipseItem* MyItem = new QGraphicsEllipseItem(x,y,2*r,2*r);
-    MyItem->setPen(pen);
-    MyItem->setBrush(brush);
-    return MyItem;
 }

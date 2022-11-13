@@ -1,5 +1,6 @@
 #ifndef STARTWIDGET_H
 #define STARTWIDGET_H
+#include <mygraphicsview.h>
 #include <QPushButton>
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -18,10 +19,9 @@ public:
     QPushButton* buttonBack = new QPushButton("Back");
     QPushButton* buttonStart = new QPushButton("Start");
     QPushButton* buttonChooseFile = new QPushButton("Choose file");
-
     QGraphicsScene* scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
-    QGraphicsView* view = new  QGraphicsView(scen);
-
+    MyGraphicsView* view = new MyGraphicsView(scen);
+    //QGraphicsView* view = new  QGraphicsView(scen);
 
     explicit StartWidget(QWidget *parent = nullptr);
 
@@ -31,7 +31,6 @@ public:
     };
 signals:
     void signalFromButton(QString str);
-    //void clicked(QStackedWidget* stack);
 public slots:
 
 };

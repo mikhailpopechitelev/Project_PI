@@ -36,6 +36,8 @@ set(PROJECT_SOURCES
         startwidget.cpp
         graph_parser.h
         graph_parser.cpp
+        mygraphicsview.h
+        mygraphicsview.cpp
         ${TS_FILES}
 )
 
