@@ -147,4 +147,47 @@ Edges::Edges()
     this->to = Vertices();
 };
 
+std::string Texts::get_text(){
+    return this->value;
+}
 
+int Texts::get_x(){
+    return x;
+}
+
+int Texts::get_y(){
+    return y;
+}
+
+Texts::Texts(const int& x,const int& y,const std::string& value){
+    this->x = x;
+    this->y = y;
+    this->value =value;
+}
+
+Texts::Texts(){
+}
+
+Vertices::Vertices(const int& x, const int& y,const std::string& m_name){
+    this->m_name =m_name;
+    this->x = x;
+    this->y = y;
+}
+
+Vertices::Vertices(const Vertices& other){
+    this->m_name = other.m_name;
+    this->x = other.x;
+    this->y = other.y;
+}
+
+std::string Vertices::get_m_name(){
+    return m_name;
+}
+
+std::string Edges::get_name_fromm(){
+    return this->from.get_m_name();
+}
+
+std::string Edges::get_name_tom(){
+    return this->to.get_m_name();
+}
