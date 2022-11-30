@@ -6,14 +6,13 @@
 #include <QGraphicsRectItem>
 #include <QAbstractGraphicsShapeItem>
 #include <QGraphicsItem>
-#include <QTextItem>
 
 
 class MyQGraphicsRectItem : public QGraphicsRectItem
 {
     //Q_OBJECT
 public:
-    explicit MyQGraphicsRectItem(const qreal& x,const qreal& y,const int& wight,const int& all_v);
+    explicit MyQGraphicsRectItem(const qreal& x,const qreal& y,const int& r);
     ~MyQGraphicsRectItem() = default;
     QRectF boundingRect() const;
     void paint(QPainter* painter,
@@ -24,15 +23,18 @@ public:
     void sick();
     void recover();
     bool isSick();
+
+public:
+    virtual void advance(int phase);
+
 signals:
 
 
 private:
-    int all_v =0;
+    bool m_sick = false;
     qreal m_x=0;
     qreal m_y=0;
-    int wight =0;
-    int m_sick =30;
+    int r =0;
 };
 
 #endif // MYQGRAPHICSRECTITEN_H

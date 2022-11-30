@@ -4,6 +4,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <human.h>
+//#include <gvc.h>
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +19,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
     EM_proj main;
     //Human* hum;
     //main.startWidget->scen->addItem(hum);

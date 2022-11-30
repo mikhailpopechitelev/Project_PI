@@ -12,6 +12,7 @@ class Authors : public QWidget
 {
     Q_OBJECT
 public:
+
     QPushButton* buttonBack = new QPushButton("Back");
     explicit Authors(QWidget *parent = nullptr);
 

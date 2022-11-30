@@ -1,11 +1,11 @@
 #include "graph_parser.h"
 
 
-int Vertices::get_x(){
+qreal Vertices::get_x(){
 return x;
 }
 
-int Vertices::get_y() {
+qreal Vertices::get_y() {
     return y;
 };
 
@@ -19,7 +19,7 @@ Vertices::Vertices() {
     this->name = 0;
 };
 
-Vertices::Vertices(const int& x, const int& y,const int& name) {
+Vertices::Vertices(const qreal& x, const qreal& y,const int& name) {
     this->x = x;
     this->y = y;
     this->name = name;
@@ -83,7 +83,7 @@ std::pair<std::vector<Edges>,std::vector<Vertices>> Edges::get_ver_edges(const s
     {
         if (tmp[i].size() == 8)
         {
-            int x = stoi(tmp[i][0][1]); int y = stoi(tmp[i][1][1]); int name = stoi(to_str(tmp[i][2][1]));
+            qreal x = stoi(tmp[i][0][1]); qreal y = stoi(tmp[i][1][1]); int name = stoi(to_str(tmp[i][2][1]));
             mas_verties.push_back(Vertices(x, y, name));
         }
         if (tmp[i].size() == 9)
@@ -119,19 +119,19 @@ int Edges::get_name_to() {
     return this->to.get_name();
 };
 
-int Edges::get_x_from() {
+qreal Edges::get_x_from() {
     return this->from.get_x();
 };
 
-int Edges::get_x_to() {
+qreal Edges::get_x_to() {
     return this->to.get_x();
 };
 
-int Edges::get_y_from() {
+qreal Edges::get_y_from() {
     return this->from.get_y();
 };
 
-int Edges::get_y_to() {
+qreal Edges::get_y_to() {
     return this->to.get_y();
 };
 
@@ -165,10 +165,7 @@ Texts::Texts(const int& x,const int& y,const std::string& value){
     this->value =value;
 }
 
-Texts::Texts(){
-}
-
-Vertices::Vertices(const int& x, const int& y,const std::string& m_name){
+Vertices::Vertices(const qreal& x, const qreal& y,const std::string& m_name){
     this->m_name =m_name;
     this->x = x;
     this->y = y;

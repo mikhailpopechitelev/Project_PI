@@ -2,12 +2,18 @@
 #include "menu.h"
 #include "startwidget.h"
 #include "graph_parser.h"
-#include "human.h"
+#include <cstdlib>
+//пока не сиользуемы люди для графа
+//#include "human.h"
+#include <thread>
+#include <chrono>
+#include <QList>
 #include <QFileDialog>
 #include <iostream>
 #include <QtCore>
 #include <QDebug>
 #include <nlohmann_json/include/nlohmann/json.hpp>
+#include <matplot/matplot.h>
 
 //создание конструктора
 EM_proj::EM_proj(QWidget *parent)
@@ -18,6 +24,7 @@ EM_proj::EM_proj(QWidget *parent)
     stack = new QStackedWidget();
     stack->addWidget(startmenu);
 
+
     //подключение кнопок приложения
     connect(startmenu->start,SIGNAL(clicked()),this,SLOT(slotButtonStart()));
     connect(startmenu->authors,SIGNAL(clicked()),this,SLOT(SlotButtonAutors()));
@@ -26,7 +33,11 @@ EM_proj::EM_proj(QWidget *parent)
     connect(startWidget->buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
 
     connect(authorsWidget->buttonBack,SIGNAL(clicked()),this,SLOT(slotButtonBack()));
+
+    //создание расстановки
     QVBoxLayout* layout = new QVBoxLayout();
+
+    //расстановка стека виджетов при создании проекта
     layout->addWidget(stack);
     this->setLayout(layout);
 }
@@ -49,7 +60,6 @@ void EM_proj::slotButtonBack(){
 void EM_proj::slotButtonStart(){
     stack->addWidget(startWidget);
     stack->setCurrentWidget(startWidget);
-
 }
 void EM_proj::SlotButtonAutors(){
     stack->addWidget(authorsWidget);
@@ -58,101 +68,89 @@ void EM_proj::SlotButtonAutors(){
 void EM_proj::SlotButtonQuite(){
     qApp->quit();
 }
-
 void EM_proj::slotButtonChoose(){
     //получает ссылку на файл и приводит её к типу строки
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
-                                       "All Files (*.*);; GRAPH (*.graph);");
+                                       "All Files (*.*);; GRAPH (*.graph);; TRIVIAL (*.tgf);");
     std::string URL = url.toStdString();
     if(URL != ""){
         loadfile(URL);
     }
+
 }
 
 //загрузка на сцену графа из файла
 void EM_proj::loadfile(const std::string& URL){
-    startWidget->view->setRenderHint(QPainter::Antialiasing,true);
-    std::ifstream i(URL);
-    nlohmann::json j;
-    i>>j;
-    std::vector<Vertices> m_ver; std::vector<Edges> m_edg; std::vector<Texts> m_tex;
 
-    //парсинг с помощью библиотеки nlohmann vertices,texts,edges
-    nlohmann::json vertices  = j["vertices"];
-    for(size_t i=0; i< vertices.size();i++){
-        int x =vertices[i]["x"]; int y =vertices[i]["y"];std::string name =vertices[i]["name"];
-        Vertices tmp = Vertices(x,y,name);
-        m_ver.push_back(tmp);
-    }
-    nlohmann::json text =j["texts"];
-    for(size_t i=0; i< text.size();i++){
-        if(text[i]["value"]!=""){
-            int x = text[i]["x"]; int y =text[i]["y"]; std::string value = text[i]["value"];
-            Texts tmp = Texts(x,y,value);
-            m_tex.push_back(tmp);
+    startWidget->view->setRenderHint(QPainter::Antialiasing,true);
+
+    //создание векторов вершин, ребер и текста для дальнейшего заполнения
+    std::vector<Vertices> m_ver; std::vector<Edges> m_edg;
+
+    if(URL.substr(URL.find_last_of(".") + 1) == "graph") //определение расширения файла и парсинг файла *.graph
+    {
+        std::ifstream i(URL);
+        nlohmann::json j;
+        i>>j;
+        //парсинг с помощью библиотеки nlohmann vertices,texts,edges
+        nlohmann::json vertices  = j["vertices"];
+        for(size_t i=0; i< vertices.size();i++){
+            int x =vertices[i]["x"]; int y =vertices[i]["y"];std::string name =vertices[i]["name"];
+            Vertices tmp = Vertices(x,y,name);
+            m_ver.push_back(tmp);
+        }
+        nlohmann::json edges =j["edges"];
+        for(size_t i=0; i< edges.size();i++){
+            Vertices ver1 = Vertices(m_ver[edges[i]["vertex1"]]); Vertices ver2 =Vertices(m_ver[edges[i]["vertex2"]]);
+            Edges tmp = Edges(ver1,ver2);
+            m_edg.push_back(tmp);
+        }
+        startWidget->scen->clear();
+    }else if(URL.substr(URL.find_last_of(".") + 1) == "tgf") // парсинг файла *.tgf
+    {
+        //разделяю файл сначало по '#' потом по '\n' потом по ' '
+
+        std::vector<std::pair<size_t,size_t>> edges;      
+        std::vector<std::string> edges_name;
+
+        //заполнение ребер и нимен ребео по файлу tgf
+        parseTgf(URL,edges_name,edges);
+        auto g = matplot::graph(edges);
+
+        //силовая расстановка графа
+        g->layout_algorithm(matplot::network::layout::force);
+
+        //получение коодринат вершин
+        auto vec_x = g->x_data();
+        auto vec_y = g->y_data();
+
+        //заполнение масива вершин
+        for (size_t i = 1; i < vec_x.size(); ++i) {
+            qreal x =8*vec_x[i]; qreal y =8*vec_y[i];std::string name =edges_name[i-1];
+            Vertices tmp = Vertices(x,y,name);
+            //qDebug() << x <<" "<< y << " "<< QString::fromStdString(name);
+            m_ver.push_back(tmp);
+        }
+
+        //заполнение массива ребер
+        for (size_t i = 0; i < edges.size(); ++i) {
+            Vertices ver1 = Vertices(m_ver[--(edges[i].first)]); Vertices ver2 =Vertices(m_ver[--(edges[i].second)]);
+            Edges tmp = Edges(ver1,ver2);
+            m_edg.push_back(tmp);
         }
     }
-    nlohmann::json edges =j["edges"];
-    for(size_t i=0; i< edges.size();i++){
-        Vertices ver1 = Vertices(m_ver[edges[i]["vertex1"]]); Vertices ver2 =Vertices(m_ver[edges[i]["vertex2"]]);
-        Edges tmp = Edges(ver1,ver2);
-        m_edg.push_back(tmp);
-    }
 
+    //создание логического графа
     std::pair<std::vector<Edges>,std::vector<Vertices>> mas_tmp;
     mas_tmp.first = m_edg;
     mas_tmp.second = m_ver;
 
-    //std::vector<std::pair<int,int>> final;
+    //очистка старой сцены
     startWidget->scen->clear();
+
+    //добавление нового графа на сцену
     addScengraph(mas_tmp);
-    int font_size=4;
-    for (size_t i = 0; i < m_edg.size(); ++i) {
-        QGraphicsLineItem* MyItem = CreateItamEdges(m_edg[i].get_x_from(),
-                                                    m_edg[i].get_y_from(),
-                                                    m_edg[i].get_x_to(),
-                                                    m_edg[i].get_y_to(),
-                                                    QPen(Qt::black,font_size,Qt::SolidLine));
-        startWidget->scen->addItem(MyItem);
-        //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
-    }
-    int count_people =0;
-    for (size_t i = 0; i < m_ver.size(); ++i) {
-        if(m_ver[i].get_m_name()!=""){
-            count_people+=std::stoi(m_ver[i].get_m_name());
-        }else{
-            count_people+=0;
-        }
-    }
-    int sr_znach = count_people/m_ver.size();
-    for (size_t i = 0; i < m_ver.size(); ++i) {
-        if(m_ver[i].get_m_name()==""){
-            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(m_ver[i].get_x(),
-                                                             m_ver[i].get_y(),0,sr_znach,
-                                                             QPen(Qt::black,1,Qt::SolidLine),
-                                                             QBrush(Qt::blue));
-            startWidget->scen->addItem(MyItem);
-        }else{
-            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(m_ver[i].get_x(),
-                                                             m_ver[i].get_y(),std::stoi(m_ver[i].get_m_name()),sr_znach,
-                                                             QPen(Qt::black,1,Qt::SolidLine),
-                                                             QBrush(Qt::blue));
-            startWidget->scen->addItem(MyItem);
-        }
-        //startWidget->scen->add
-        //Human* hum = new Human(mas.second[i].get_x()-10,mas.second[i].get_y()-10);
-        //startWidget->scen->addSimpleText();
-        //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения вершины
-    }
-    /*
-    for (size_t i = 0; i < m_tex.size(); ++i) {
-        QGraphicsSimpleTextItem text =QGraphicsSimpleTextItem(QString::fromStdString(m_tex[i].get_text()));
-        text.setPos(m_tex[i].get_x(),m_tex[i].get_y());
-        startWidget->scen->addItem(&text);
-        //std::cout << m_tex[i].get_text();
-    }
-    */
 
 
 
@@ -165,14 +163,16 @@ void EM_proj::loadfile(const std::string& URL){
     startWidget->view->resetTransform();
 
     //скалирует изображение в зависимости от размеров окна
-    int size_x = startWidget->view->width();; int size_y =startWidget->view->height();;
-    double scale = std::min((size_x/len_x),(size_y/len_y));
+    qreal size_x = startWidget->view->width();; qreal size_y =startWidget->view->height();;
+    qreal scale = std::min((size_x/len_x),(size_y/len_y));
     if(scale>=1){
         startWidget->view->scale(scale*0.8,scale*0.8);
     }else{
         scale =std::max((len_x/size_x)+1,(len_y/size_y)+1);
         startWidget->view->scale((1/scale),(1/scale));
     }
+
+    startWidget->stepTimer->start(1000);
 }
 
 //создание ребра по начальной ,конечной точке и выбор стиля ребра
@@ -184,11 +184,13 @@ QGraphicsLineItem* EM_proj::CreateItamEdges(const int& x1,const int& y1,
     return MyItem;
 }
 
-//добавление графа на сцену
-void EM_proj::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
-
-};
-
+MyQGraphicsRectItem* EM_proj::CreateMyItamVerties(const int& x,const int& y,const int& r,
+                              const QPen& pen, const QBrush& brush){
+MyQGraphicsRectItem* MyItem = new MyQGraphicsRectItem(x,y,r);
+MyItem->setPen(pen);
+MyItem->setBrush(brush);
+return MyItem;
+}
 
 //нахождения минимальных и максимальных точке на графе (чтобы потом его отцентровывать и масштабировать)
 std::vector<std::pair<int,int>> EM_proj::findMinPointMaxPoint(
@@ -217,10 +219,78 @@ std::vector<std::pair<int,int>> EM_proj::findMinPointMaxPoint(
     return final;
 }
 
-MyQGraphicsRectItem* EM_proj::CreateMyItamVerties(const int& x,const int& y,const int& wight,const int& all_v,
-                              const QPen& pen, const QBrush& brush){
-MyQGraphicsRectItem* MyItem = new MyQGraphicsRectItem(x,y,wight,all_v);
-MyItem->setPen(pen);
-MyItem->setBrush(brush);
-return MyItem;
+
+void EM_proj::parseTgf(const std::string &URL, std::vector<std::string>& edges_name, std::vector<std::pair<size_t,size_t>>& edges){
+    std::ifstream file(URL);
+    std::string str="";
+    int i =0 ;
+    while (std::getline(file, str, '#')) {
+        if(i==0){
+            std::stringstream Str(str);
+            std::string str_tmp ="";
+            while (std::getline(Str, str_tmp, '\n')) {
+                std::stringstream Str_tmp(str_tmp);
+                std::string str_t ="";
+                int j = 0;
+                while (std::getline(Str_tmp, str_t, ' ')) {
+                    if(j==0){
+                        //для названия вершин заполняю их имена
+                        std::string name = str_t;
+                        edges_name.push_back(name);
+                    }
+                    j++;
+                }
+            }
+        }else if(i==1){
+            for (size_t i = 0; i < str.size()-1; ++i) {
+                str[i]=str[i+1];
+            }
+            str.pop_back();
+            std::stringstream Str(str);
+            std::string str_tmp ="";
+            while (std::getline(Str, str_tmp, '\n')) {
+                std::stringstream Str_tmp(str_tmp);
+                std::string str_t ="";
+                std::vector<size_t> vec_edge;
+                while (std::getline(Str_tmp, str_t,' ')) {
+                    //заполняю массив ребер
+                    size_t edge = std::stoi(str_t);
+                    vec_edge.push_back(edge);
+                }
+                edges.push_back(std::pair<int,int>(vec_edge[0],vec_edge[1]));
+            }
+        }
+        i++;
+    }
 }
+
+//добавление графа на сцену
+void EM_proj::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
+    int font_size=this->startWidget->view->width()/200;
+    for (size_t i = 0; i < mas.first.size(); ++i) {
+        QGraphicsLineItem* MyItem = CreateItamEdges(mas.first[i].get_x_from(),
+                                                    mas.first[i].get_y_from(),
+                                                    mas.first[i].get_x_to(),
+                                                    mas.first[i].get_y_to(),
+                                                    QPen(Qt::black,font_size,Qt::SolidLine));
+        startWidget->scen->addItem(MyItem);
+        //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
+    }
+    for (size_t i = 0; i < mas.second.size(); ++i) {
+        if(mas.second[i].get_m_name()==""){
+            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
+                                                             mas.second[i].get_y(),this->startWidget->view->width()/70,
+                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QBrush(Qt::blue));
+            startWidget->Vec_Item.push_back(MyItem);
+            startWidget->scen->addItem(MyItem);
+        }else{
+            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
+                                                             mas.second[i].get_y(),this->startWidget->view->width()/70,
+                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QBrush(Qt::blue));
+            startWidget->Vec_Item.push_back(MyItem);
+            startWidget->scen->addItem(MyItem);
+        }
+    }
+};

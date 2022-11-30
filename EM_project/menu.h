@@ -13,10 +13,12 @@ class Menu : public QWidget
 {
     Q_OBJECT
 public:
+    //поля стартового приложения
     QPushButton* start = new QPushButton("Start");
     QPushButton* authors = new QPushButton("Authors");
     QPushButton* quit = new QPushButton("Quit");
 
+    //конструтор меню
     explicit Menu(QWidget *parent = nullptr);
 
 signals:
