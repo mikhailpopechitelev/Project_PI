@@ -1,10 +1,8 @@
 #include <QApplication>
-#include "em_proj.h"
+#include <em_proj.h>
 #include <QCoreApplication>
 #include <QLocale>
 #include <QTranslator>
-#include <human.h>
-//#include <gvc.h>
 
 int main(int argc, char *argv[])
 {
@@ -21,8 +19,6 @@ int main(int argc, char *argv[])
     }
 
     EM_proj main;
-    //Human* hum;
-    //main.startWidget->scen->addItem(hum);
     main.resize(800,600);
     main.show();
 

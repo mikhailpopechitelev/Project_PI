@@ -41,8 +41,6 @@ set(PROJECT_SOURCES
         mygraphicsview.cpp
         myqgraphicsrectiten.h
         myqgraphicsrectiten.cpp
-        human.h
-        human.cpp
         ${TS_FILES}
 )
 

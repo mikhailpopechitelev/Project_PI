@@ -3,6 +3,7 @@
 MyGraphicsView::MyGraphicsView(QGraphicsScene* scen,QWidget* parent)
     : QGraphicsView{scen,parent}
 {
+    this->setRenderHint(QPainter::Antialiasing,true);
     this->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 

@@ -1,15 +1,13 @@
-#include "autors.h"
-#include<em_proj.h>
+#include<autors.h>
 
 Authors::Authors(QWidget *parent)
     : QWidget{parent}
 {
-    buttonBack = new QPushButton("Back");
+    this->buttonBack = new QPushButton("Back");
     QVBoxLayout* buttonBox = new QVBoxLayout();
+
+    //connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
+
     buttonBox->addWidget(buttonBack);
-
-    connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
-
     this->setLayout(buttonBox);
-    this->resize(800,600);
 }
