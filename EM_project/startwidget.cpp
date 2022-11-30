@@ -3,6 +3,13 @@
 StartWidget::StartWidget(QWidget *parent)
     : QWidget{parent}
 {
+    //инициализируем поля
+    buttonBack = new QPushButton("Back");
+    buttonStart = new QPushButton("Start");
+    buttonChooseFile = new QPushButton("Choose file");
+    scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
+    view = new MyGraphicsView(scen);
+
     QHBoxLayout* HBoxLayout = new QHBoxLayout();
     QVBoxLayout* VBoxLayoutfirst = new QVBoxLayout();
     QVBoxLayout* VBoxLayoutsecond = new QVBoxLayout();
@@ -36,5 +43,4 @@ StartWidget::StartWidget(QWidget *parent)
 
 void StartWidget::onStepTimer(){
     Vec_Item[rand()%Vec_Item.size()-1]->sick();
-    qDebug() << rand()%Vec_Item.size()-1;
 }

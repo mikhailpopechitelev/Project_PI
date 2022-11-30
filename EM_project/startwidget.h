@@ -23,7 +23,6 @@ public:
     QPushButton* buttonChooseFile = new QPushButton("Choose file");
     QGraphicsScene* scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
     MyGraphicsView* view = new MyGraphicsView(scen);
-    //QGraphicsView* view = new  QGraphicsView(scen);
     QTimer* stepTimer;
     std::vector<MyQGraphicsRectItem*> Vec_Item;
 

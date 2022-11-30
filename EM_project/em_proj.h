@@ -19,21 +19,19 @@ class EM_proj : public QWidget
 {
     Q_OBJECT
 public:
-    //поля всего проекта
-    QStackedWidget* stack;
-    Menu* startmenu = new Menu();
-    StartWidget* startWidget = new StartWidget();
-    Authors* authorsWidget = new Authors();
+    //получить стек
+    QStackedWidget* getSteck();
 
     //работа со стеком
     void pushStack(QWidget* wgt);
     void popStack();
 
+    //загрузка файла и его парсер через *.graph и *.tgf
+    void loadfile(const std::string& url);
+
     //работа с графами считанными из файла
     void parseTgf(const std::string& url,std::vector<std::string>& edges_name,
                   std::vector<std::pair<size_t,size_t>>& edges);
-    //загрузка файла и его парсер через *.graph и *.tgf
-    void loadfile(const std::string& url);
 
     //отрисовка графа по списку вершин и ребер
     void addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas);
@@ -49,10 +47,14 @@ public:
                                    const QPen& pen);
     MyQGraphicsRectItem* CreateMyItamVerties(const int& x,const int& y,const int& r,
                                              const QPen& pen, const QBrush& brush);
-
-    //пока не используемая функция разположение текста на графе
-    QGraphicsSimpleTextItem* CreateItamSimpleText();
     explicit EM_proj(QWidget *parent = nullptr);
+
+private:
+    //поля всего проекта
+    QStackedWidget* stack;
+    Menu* startmenu;
+    StartWidget* startWidget;
+    Authors* authorsWidget;
 
 private slots:    
 

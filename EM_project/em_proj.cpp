@@ -14,25 +14,27 @@
 #include <QDebug>
 #include <nlohmann_json/include/nlohmann/json.hpp>
 #include <matplot/matplot.h>
+QStackedWidget* EM_proj::getSteck(){
+    return this->stack;
+}
 
 //создание конструктора
 EM_proj::EM_proj(QWidget *parent)
     : QWidget{parent}
 {
-    //Заполнение стека
-    //QTextCodec::setCodecForLocale(QTextCodec::codecForName("Windows-1251"));
+    startmenu = new Menu(this);
+    startWidget = new StartWidget();
+    authorsWidget = new Authors(this);
+
+    //создание стка
     stack = new QStackedWidget();
     stack->addWidget(startmenu);
 
 
     //подключение кнопок приложения
-    connect(startmenu->start,SIGNAL(clicked()),this,SLOT(slotButtonStart()));
-    connect(startmenu->authors,SIGNAL(clicked()),this,SLOT(SlotButtonAutors()));
-    connect(startmenu->quit,SIGNAL(clicked()),this,SLOT(SlotButtonQuite()));
     connect(startWidget->buttonBack,SIGNAL(clicked()),this,SLOT(slotButtonBack()));
     connect(startWidget->buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
 
-    connect(authorsWidget->buttonBack,SIGNAL(clicked()),this,SLOT(slotButtonBack()));
 
     //создание расстановки
     QVBoxLayout* layout = new QVBoxLayout();
@@ -47,14 +49,12 @@ void EM_proj::pushStack(QWidget* wgt){
     stack->addWidget(wgt);
 }
 void EM_proj::popStack(){
-    QWidget* wgt = stack->currentWidget();
-    stack->removeWidget(wgt);
+    stack->removeWidget(stack->currentWidget());
 }
 
 //реализация словот кнопок
 void EM_proj::slotButtonBack(){
-    QWidget* wgt = stack->currentWidget();
-    stack->removeWidget(wgt);
+    stack->removeWidget(stack->currentWidget());
     stack->setCurrentWidget(stack->currentWidget());
 }
 void EM_proj::slotButtonStart(){
