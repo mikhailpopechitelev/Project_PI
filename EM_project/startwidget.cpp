@@ -1,19 +1,44 @@
 #include <startwidget.h>
 
-
 StartWidget::StartWidget(QWidget *parent)
     : QWidget{parent}
 {
     //инициализируем поля
     buttonBack = new QPushButton("Back");
     buttonStart = new QPushButton("Start");
+    buttonStop = new QPushButton("Stop");
+
+    //ползунок коэффициента распространения
+    distribution_с = new QSlider(Qt::Horizontal);
+    distribution_с->setRange(0,10);
+    distribution_с->setTickInterval(1);
+    distribution_с->setValue(1);
+    distribution_с->setTickPosition(QSlider::TicksBelow);
+
+    //коэффициент летальности
+    mortality_rate = new QSlider(Qt::Horizontal);
+    mortality_rate->setRange(0,10);
+    mortality_rate->setTickInterval(1);
+    mortality_rate->setValue(1);
+    mortality_rate->setTickPosition(QSlider::TicksBelow);
+
+    //коэйффициент эффективности здравоохранения
+    health_efficiency = new QSlider(Qt::Horizontal);
+    health_efficiency->setRange(0,10);
+    health_efficiency->setTickInterval(1);
+    health_efficiency->setValue(1);
+    health_efficiency->setTickPosition(QSlider::TicksBelow);
+
     buttonChooseFile = new QPushButton("Choose file");
     scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
     view = new MyGraphicsView(scen);
+    m_sick = 0;
 
     //подключение кнопок приложения
     connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
     connect(buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
+    connect(buttonStart,SIGNAL(clicked()),this,SLOT(onStartButton()));
+    connect(buttonStop,SIGNAL(clicked()),this,SLOT(onStopButton()));
 
     //создание расположения кнопок
     QHBoxLayout* HBoxLayout = new QHBoxLayout();
@@ -29,13 +54,15 @@ StartWidget::StartWidget(QWidget *parent)
     connect(animatiomTimer,SIGNAL(timeout()),scen,SLOT(advance()));
     connect(stepTimer,SIGNAL(timeout()),this,SLOT(onStepTimer()));
 
-    //старк таймера
-    //animatiomTimer->start(1000/24);
-
     //вертикальная расстановка
     VBoxLayoutfirst->addWidget(buttonStart);
+    VBoxLayoutfirst->addWidget(buttonStop);
+    VBoxLayoutfirst->addWidget(distribution_с);
+    VBoxLayoutfirst->addWidget(mortality_rate);
+    VBoxLayoutfirst->addWidget(health_efficiency);
     VBoxLayoutfirst->addWidget(buttonChooseFile);
     VBoxLayoutfirst->addWidget(buttonBack);
+
 
     //расстановка слева на право
     HBoxLayout->addLayout(VBoxLayoutfirst);
@@ -55,17 +82,91 @@ void StartWidget::slotButtonChoose(){
     //получает ссылку на файл и приводит её к типу строки
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
-                                       "All Files (*.*);; GRAPH (*.graph);; TRIVIAL (*.tgf);");
+                                       "All Files (*.*);; GRAPH (*.graph);; TRIVIAL (*.tgf);; DOT (*.dot);; TXT (*.txt);");
+
     std::string URL = url.toStdString();
     if(URL != ""){
+        Vec_Item.clear();
+        adjacency_list.clear();
         loadfile(URL);
+        Vec_Item[0]->infected();
+        stepTimer->stop();
     }
 }
 
-void StartWidget::onStepTimer(){
-    Vec_Item[rand()%(Vec_Item.size())]->sick();
+void StartWidget::onStepTimer(){  
+    //количество зараженных
+    std::vector<int> tmp;
+
+    //подсчет количество зараженных вершин
+    for (size_t i = 0; i < Vec_Item.size(); ++i) {
+        if((Vec_Item[i]->isSick())||(Vec_Item[i]->isInfectd())){ //
+            tmp.push_back(i);
+        }
+    }
+
+    //заражение всех соседних клеток для вершины
+    for (size_t i = 0; i < tmp.size(); ++i) {
+        for (size_t j = 0; j < adjacency_list[tmp[i]].size(); ++j) {
+            if((!adjacency_list[tmp[i]][j]->isRecover())&&(!adjacency_list[tmp[i]][j]->isDead())){
+                if(rand()%1==0){ //коэффициент распространения
+                    adjacency_list[tmp[i]][j]->infected(); //sick
+                }
+            }
+        }
+    }
+
+    //для каждой верины подсчет количества её дней болезни
+    for (size_t i = 0; i < Vec_Item.size(); ++i) {
+        if(Vec_Item[i]->isInfectd()){
+            Vec_Item[i]->day_sick++;
+            if(Vec_Item[i]->day_sick==3){//шанс заболеть
+                if((rand()%2==0)){
+                    Vec_Item[i]->recover();
+                    Vec_Item[i]->day_sick=0;
+                }else{
+                    Vec_Item[i]->sick();
+                }
+            }
+        }
+        if(Vec_Item[i]->isSick()){
+            Vec_Item[i]->day_sick++;
+            if(Vec_Item[i]->day_sick==8){// 8 - 3 количество дней для выздоровления
+                if(rand()%10==0){//коэффициент мсертности
+                    Vec_Item[i]->dead();
+                    Vec_Item[i]->day_sick=0;
+                }else{
+                    Vec_Item[i]->recover();
+                    Vec_Item[i]->day_sick=0;
+                }
+            }
+        }
+        if(Vec_Item[i]->isRecover()){
+            Vec_Item[i]->day_recovered++;
+            if(Vec_Item[i]->day_recovered==3){
+                Vec_Item[i]->unrecovered();
+                Vec_Item[i]->day_recovered=0;
+            }
+        }
+    }
+    int count_sick=0;
+    for (size_t i = 0; i < Vec_Item.size(); ++i) {
+        if((Vec_Item[i]->isSick())||(Vec_Item[i]->isInfectd())){
+            count_sick++;
+        }
+    }
+    if(count_sick==0){
+        this->stepTimer->stop();
+    }
+    scen->update();
 }
 
+std::string readFile(const std::string& fileName) {
+    std::ifstream f(fileName);
+    std::stringstream ss;
+    ss << f.rdbuf();
+    return ss.str();
+}
 
 //загрузка на сцену графа из файла
 void StartWidget::loadfile(const std::string& URL){
@@ -82,7 +183,7 @@ void StartWidget::loadfile(const std::string& URL){
         nlohmann::json vertices  = j["vertices"];
         for(size_t i=0; i< vertices.size();i++){
             int x =vertices[i]["x"]; int y =vertices[i]["y"];std::string name =vertices[i]["name"];
-            Vertices tmp = Vertices(x,y,name);
+            Vertices tmp = Vertices(x,y,name,i);
             m_ver.push_back(tmp);
         }
         nlohmann::json edges =j["edges"];
@@ -92,7 +193,7 @@ void StartWidget::loadfile(const std::string& URL){
             m_edg.push_back(tmp);
         }
         scen->clear();
-    }else if(URL.substr(URL.find_last_of(".") + 1) == "tgf") // парсинг файла *.tgf
+    }/*else if(URL.substr(URL.find_last_of(".") + 1) == "tgf") // парсинг файла *.tgf
     {
         //разделяю файл сначало по '#' потом по '\n' потом по ' '
 
@@ -124,7 +225,61 @@ void StartWidget::loadfile(const std::string& URL){
             Edges tmp = Edges(ver1,ver2);
             m_edg.push_back(tmp);
         }
-    }
+    }*/
+    else if(URL.substr(URL.find_last_of(".") + 1) == "txt") // парсинг файла c языком .DOT
+        {
+            GVC_t* gvc;
+            Agraph_t* G;
+            gvc = gvContext();
+            std::string s;
+            std::ifstream f(URL);
+            std::stringstream ss;
+            ss << f.rdbuf();
+            s = ss.str();
+            QString qstr = QString::fromStdString(s);
+            G = agmemread(s.c_str());
+
+            //расположение графа
+            gvLayout(gvc, G, "neato"); // dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi
+
+            //создание узлов и ребер
+            Agnode_t* n;
+            Agedge_t* e;
+            int id = 0;
+
+            //перебор всех узлов и сопоставление кажому свой id создание массива вершин m_ver
+            for (n = agfstnode(G); n; n = agnxtnode(G,n)) {
+                std::string s = std::to_string(id);
+                const char* str = s.c_str();
+                Agsym_t *attr_label = agattr(G, AGNODE, "id", "");
+                agset(n,"id",str);
+                Vertices tmpnode = Vertices(ND_coord(n).x,ND_coord(n).y,agnameof(n),id); //((Agnodeinfo_t*)AGDATA(n))->id) ;
+                m_ver.push_back(tmpnode);
+                id++;
+            }
+
+            //обход всех ребер и заполнение массива ребер m_edg
+            Agnode_t* n_;
+            int count =0;
+            for (n_ = agfstnode(G); n_; n_ = agnxtnode(G,n_)) {
+                for (e = agfstout(G,n_); e; e = agnxtout(G,e)){
+                    Vertices ver1 = Vertices(ND_coord(agtail(e)).x,ND_coord(agtail(e)).y,
+                                             agnameof(agtail(e)),std::stoi(agget(agtail(e),"id")));
+                    Vertices ver2 =Vertices(ND_coord(aghead(e)).x,ND_coord(aghead(e)).y,
+                                            agnameof(aghead(e)),std::stoi(agget(aghead(e),"id")));
+                    //qDebug() << ver1.get_id() << ver2.get_id();
+                    Edges tmp = Edges(ver1,ver2);
+                    m_edg.push_back(tmp);
+                    count++;
+                }
+            }
+
+            //очиста ресурсов компьютера
+            gvFreeLayout(gvc, G);
+            agclose(G);
+            gvFreeContext(gvc);
+        }
+
 
     //создание логического графа
     std::pair<std::vector<Edges>,std::vector<Vertices>> mas_tmp;
@@ -154,11 +309,9 @@ void StartWidget::loadfile(const std::string& URL){
     }else{
         scale =std::max((len_x/size_x)+1,(len_y/size_y)+1);
         view->scale((1/scale),(1/scale));
-    }
-    qDebug() << 5;
-
-    stepTimer->start(1000);
+    }      
 }
+
 
 //создание ребра по начальной ,конечной точке и выбор стиля ребра
 QGraphicsLineItem* StartWidget::CreateItamEdges(const int& x1,const int& y1,
@@ -169,7 +322,7 @@ QGraphicsLineItem* StartWidget::CreateItamEdges(const int& x1,const int& y1,
     return MyItem;
 }
 
-MyQGraphicsRectItem* StartWidget::CreateMyItamVerties(const int& x,const int& y,const int& r,
+MyQGraphicsRectItem* StartWidget::CreateMyItamVerties(const int& x,const int& y,const qreal& r,
                               const QPen& pen, const QBrush& brush){
 MyQGraphicsRectItem* MyItem = new MyQGraphicsRectItem(x,y,r);
 MyItem->setPen(pen);
@@ -252,18 +405,69 @@ void StartWidget::parseTgf(const std::string &URL, std::vector<std::string>& edg
 //добавление графа на сцену
 void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
     int font_size=view->width()/200;
-    for (int var = 0; var < mas.second.size(); ++var) {
-        qDebug() << mas.second[var].get_x() <<mas.second[var].get_y();
-    }
+    //qreal font_size = 0.75/3;
+    //создание всех ребер
     for (size_t i = 0; i < mas.first.size(); ++i) {
-        QGraphicsLineItem* MyItem = CreateItamEdges(mas.first[i].get_x_from(),
-                                                    mas.first[i].get_y_from(),
-                                                    mas.first[i].get_x_to(),
-                                                    mas.first[i].get_y_to(),
+        QGraphicsLineItem* MyItem = CreateItamEdges(mas.first[i].get_vertices_from().get_x(),
+                                                    mas.first[i].get_vertices_from().get_y(),
+                                                    mas.first[i].get_vertices_to().get_x(),
+                                                    mas.first[i].get_vertices_to().get_y(),
                                                     QPen(Qt::black,font_size,Qt::SolidLine));
         scen->addItem(MyItem);
         //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
     }
+
+    //создание логического списка смежности
+    std::vector<std::vector<Vertices>> tmp;
+    tmp.resize(mas.second.size());
+    adjacency_list.resize(mas.second.size());
+    for (size_t i = 0; i < mas.first.size(); ++i) {
+        tmp[mas.first[i].get_vertices_from().get_id()].push_back(mas.first[i].get_vertices_to());
+        tmp[mas.first[i].get_vertices_to().get_id()].push_back(mas.first[i].get_vertices_from());
+    }
+
+    adjacency_list.resize(mas.second.size());
+    Vec_Item.resize(mas.second.size());
+    //создание узлов графа и заполнение списка смежности
+    //можно было заолнить список через itamAt но он возвращает QGraphicsItem* из-за чего вызвать sick() нельзя
+    for (size_t i = 0; i < mas.second.size(); ++i) {
+        if(mas.second[i].get_m_name()==""){
+            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
+                                                             mas.second[i].get_y(),view->width()/70,//view->width()/70,std::sqrt((scen->width()*scen->height())/(75*Vec_Item.size()))
+                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QBrush(Qt::blue));
+            Vec_Item[i]=(MyItem);
+            scen->addItem(MyItem);
+            for (size_t j = 0; j < tmp.size(); ++j) {
+                for (size_t k = 0; k < tmp[j].size(); ++k) {
+                    if(tmp[j][k].get_id()==mas.second[i].get_id()){
+                        adjacency_list[j].push_back(MyItem);
+                    }
+                }
+            }            
+        }else{
+            MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
+                                                             mas.second[i].get_y(),view->width()/70,//view->width()/70,std::sqrt((scen->width()*scen->height())/(75*Vec_Item.size()))
+                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QBrush(Qt::blue));
+            Vec_Item[i]=(MyItem);
+            scen->addItem(MyItem);
+            for (size_t j = 0; j < tmp.size(); ++j) {
+                for (size_t k = 0; k < tmp[j].size(); ++k) {
+                    if(tmp[j][k].get_id()==mas.second[i].get_id()){
+                        adjacency_list[j].push_back(MyItem);
+                    }
+                }
+            }
+        }
+    }
+    /*
+    for (int var = 0; var < adjacency_list.size(); ++var) {
+        for (int j = 0; j < adjacency_list[var].size(); ++j) {
+            adjacency_list[var][j]->print_id();
+        }
+    }*/
+    /*
     for (size_t i = 0; i < mas.second.size(); ++i) {
         if(mas.second[i].get_m_name()==""){
             MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
@@ -280,7 +484,14 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
             Vec_Item.push_back(MyItem);
             scen->addItem(MyItem);
         }
-    }
+    }*/
 };
 
+void StartWidget::onStartButton(){
+    scen->update();
+    stepTimer->start(100);
+}
 
+void StartWidget::onStopButton(){
+    stepTimer->stop();
+}

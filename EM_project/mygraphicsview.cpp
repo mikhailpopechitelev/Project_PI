@@ -22,8 +22,7 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
         }else{
             factor =0.9;
         }
-
-        scale(factor,factor);
+        this->scale(factor,factor);
         setTransformationAnchor(anchor);
     }
 

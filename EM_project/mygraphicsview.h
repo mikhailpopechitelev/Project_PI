@@ -11,6 +11,7 @@
 #include <QStackedWidget>
 #include <QGraphicsView>
 #include <QWheelEvent>
+#include <QGraphicsItem>
 
 
 class MyGraphicsView : public QGraphicsView

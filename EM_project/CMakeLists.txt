@@ -15,11 +15,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #поиск системой сборки файлов
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt6 REQUIRED COMPONENTS QuickWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-#find_package(nlohmann_json)
+#find_package(Qt6 REQUIRED COMPONENTS QuickWidgets)
+#find_package(Qt6 REQUIRED COMPONENTS Widgets)
+# PATHS "C:/Program Files (x86)/Graphviz/bin"
+set(CMAKE_PREFIX_PATH C:/Program Files/Graphviz/lib)
 
-
+find_library(CDT
+    NAMES cdt)
+find_library(CGRAPH
+    NAMES cgraph++)
+find_library(GVC
+    NAMES gvc++)
+            #PATH "C:/Program Files/Graphviz/lib"
+            #NO_CACHE )
 #из каких языков проект
 set(TS_FILES EM_project_en_GB.ts)
 
@@ -76,20 +84,36 @@ endif()
 
 
 #подключение библиотек
-#target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(nlohmann_json)
-add_subdirectory(matplotplusplus)
 
 
-#target_link_libraries(${EM_project} nlohmann::nlohmann )
-#add_executable(EM_project em_proj.h)
+#set(PROJECT_LINK_LIBS ast.lib cdt.lib cgraph.lib circogen.lib dot.lib dotgen.lib expr.lib fdpgen.lib gd.lib graph.lib gts.lib gvc.lib
+#gvortho.lib gvpack.lib gvplugin_core.lib gvplugin_dot_layout.lib gvplugin_gd.lib gvplugin_gdiplus.lib gvplugin_neato_layout.lib gvplugin_pango.lib
+#gvprlib.lib ingraphs.lib minglelib.lib neatogen.lib osage.lib patchwork.lib Pathplan.lib rbtree.lib sfdp.lib sfio.lib sparse.lib
+#topfish.lib twopigen.lib vmalloc.lib vpsc.lib xdot.lib)
+#set(PROJECT_LINK_LIBS ${GVC} )
+#set(PROJECT_LINK_LIBS ann.dll cdt.dll cgraph.dll gvc.dll gvplugin_core.dll gvplugin_dot_layout.dll gvplugin_gd.dll gvplugin_gdiplus.dll
+#gvplugin_neato_layout.dll gvplugin_pango.dll Pathplan.dll vmalloc.dll)
+#find_package(PkgConfig)
+#pkg_check_modules(GVC REQUIRED libgvc)
+#target_include_directories(EM_project SYSTEM PUBLIC "C:/Program Files (x86)/Graphviz/bin")
 
-target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets nlohmann_json::nlohmann_json matplot)
 
-#add_subdirectory(dependencies/)
-#target_link_libraries(${EM_project} nlohmann)
+target_include_directories(EM_project SYSTEM PUBLIC "C:/Program Files/Graphviz/include/graphviz")  #${CGRAPH_LIBRARY} ${CDT_LIBRARY} ${GVC_LIBRARY}
+
+
+message("4444")
+message("${GVC}")
+message("${CDT}")
+message("${CGRAPH}")
+message("3333")
+
+target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+    "C:/Program Files/Graphviz/lib/gvc.lib"
+   "C:/Program Files/Graphviz/lib/cgraph.lib"
+   "C:/Program Files/Graphviz/lib/cdt.lib"
+    nlohmann_json::nlohmann_json)
 
 
 #сборка под разные ОС

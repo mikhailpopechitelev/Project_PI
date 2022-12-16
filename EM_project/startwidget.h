@@ -14,7 +14,11 @@
 #include <QGraphicsEllipseItem>
 #include <QTimer>
 #include <nlohmann_json/include/nlohmann/json.hpp>
-#include <matplot/matplot.h>
+#include <QLabel>
+//#include <matplot/matplot.h>
+#include<gvc.h>
+
+
 
 
 class StartWidget: public QWidget
@@ -47,9 +51,9 @@ public:
     QGraphicsLineItem* CreateItamEdges(const int& x1,const int& y1,
                                    const int& x2,const int& y2,
                                    const QPen& pen);
-    MyQGraphicsRectItem* CreateMyItamVerties(const int& x,const int& y,const int& r,
+    MyQGraphicsRectItem* CreateMyItamVerties(const int& x,const int& y,const qreal& r,
                                              const QPen& pen, const QBrush& brush);
-
+    std::string readFile(const std::string& str);
 signals:
     void signalFromButton(QString str);
 
@@ -57,18 +61,26 @@ public slots:
 
     void slotButtonChoose();
     void onStepTimer();
+    void onStartButton();
+    void onStopButton();
 
 private:
 
+    QSlider* mortality_rate;
+    QSlider* health_efficiency;
+    QSlider* distribution_с;
     std::vector<MyQGraphicsRectItem*> Vec_Item;
+    //std::vector<QGraphicsLineItem*> Vec_Imem_edges;
+    std::vector<std::vector<MyQGraphicsRectItem*>> adjacency_list;
     QTimer* stepTimer;
     QGraphicsScene* scen;
     MyGraphicsView* view;
+    QPushButton* buttonStop;
     QPushButton* buttonBack;
     QPushButton* buttonStart;
     QPushButton* buttonChooseFile;
     QTimer* animatiomTimer;
-
+    int m_sick;
 
 
 };

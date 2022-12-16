@@ -9,26 +9,25 @@ qreal Vertices::get_y() {
     return y;
 };
 
-int Vertices::get_name() {
-return name;
-};
-
 Vertices::Vertices() {
     this->x = 0;
     this->y = 0;
-    this->name = 0;
+    this->id =0;
 };
 
-Vertices::Vertices(const qreal& x, const qreal& y,const int& name) {
+Vertices::Vertices(const qreal& x, const qreal& y,const std::string& m_name, const int& id, const qreal& r){
     this->x = x;
     this->y = y;
-    this->name = name;
-};
+    this->id =id;
+    this->m_name = m_name;
+    this->r = r;
+}
 
 Vertices& Vertices::operator=(const Vertices& other) {
-    this->name = other.name;
+    this->m_name = other.m_name;
     this->x = other.x;
     this->y = other.y;
+    this->id = other.id;
     return *this;
 };
 
@@ -41,6 +40,7 @@ std::string Edges::to_str(const std::string& s) {
     return str;
 };
 
+/*
 std::pair<std::vector<Edges>,std::vector<Vertices>> Edges::get_ver_edges(const std::string& url){
     std::pair<std::vector<Edges>,std::vector<Vertices>> final_mas;
     std::vector<Vertices> mas_verties;
@@ -84,7 +84,7 @@ std::pair<std::vector<Edges>,std::vector<Vertices>> Edges::get_ver_edges(const s
         if (tmp[i].size() == 8)
         {
             qreal x = stoi(tmp[i][0][1]); qreal y = stoi(tmp[i][1][1]); int name = stoi(to_str(tmp[i][2][1]));
-            mas_verties.push_back(Vertices(x, y, name));
+            mas_verties.push_back(Vertices(x, y, name,i));
         }
         if (tmp[i].size() == 9)
         {
@@ -96,7 +96,7 @@ std::pair<std::vector<Edges>,std::vector<Vertices>> Edges::get_ver_edges(const s
     final_mas.second = mas_verties;
     return final_mas;
 }
-
+*/
 std::vector<std::string> Edges::split(const std::string& s, const char& delimber ) {
     std::vector<std::string> tmp;
     std::stringstream ss(s);
@@ -111,29 +111,7 @@ std::vector<std::string> Edges::split(const std::string& s, const char& delimber
     return tmp;
 }
 
-int Edges::get_name_from() {
-    return this->from.get_name();
-};
 
-int Edges::get_name_to() {
-    return this->to.get_name();
-};
-
-qreal Edges::get_x_from() {
-    return this->from.get_x();
-};
-
-qreal Edges::get_x_to() {
-    return this->to.get_x();
-};
-
-qreal Edges::get_y_from() {
-    return this->from.get_y();
-};
-
-qreal Edges::get_y_to() {
-    return this->to.get_y();
-};
 
 Edges::Edges(Vertices from, Vertices to)
 {
@@ -147,44 +125,33 @@ Edges::Edges()
     this->to = Vertices();
 };
 
-std::string Texts::get_text(){
-    return this->value;
-}
-
-int Texts::get_x(){
-    return x;
-}
-
-int Texts::get_y(){
-    return y;
-}
-
-Texts::Texts(const int& x,const int& y,const std::string& value){
-    this->x = x;
-    this->y = y;
-    this->value =value;
-}
-
-Vertices::Vertices(const qreal& x, const qreal& y,const std::string& m_name){
+Vertices::Vertices(const qreal& x, const qreal& y,const std::string& m_name, const int& id){
     this->m_name =m_name;
     this->x = x;
     this->y = y;
+    this->id = id;
 }
 
 Vertices::Vertices(const Vertices& other){
     this->m_name = other.m_name;
     this->x = other.x;
     this->y = other.y;
+    this->id = other.id;
 }
 
 std::string Vertices::get_m_name(){
     return m_name;
 }
 
-std::string Edges::get_name_fromm(){
-    return this->from.get_m_name();
+
+Vertices Edges::get_vertices_from(){
+    return this->from;
 }
 
-std::string Edges::get_name_tom(){
-    return this->to.get_m_name();
+Vertices Edges::get_vertices_to(){
+    return this->to;
+}
+
+int Vertices::get_id(){
+    return id;
 }
