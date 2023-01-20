@@ -3,11 +3,13 @@
 Authors::Authors(QWidget *parent)
     : QWidget{parent}
 {
-    this->buttonBack = new QPushButton("Back");
+    buttonBack_a = new QPushButton("Back");
+    connect(buttonBack_a,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
+
+    QHBoxLayout* HBoxLayout = new QHBoxLayout();
     QVBoxLayout* buttonBox = new QVBoxLayout();
 
-    connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
-
-    buttonBox->addWidget(buttonBack);
-    this->setLayout(buttonBox);
+    buttonBox->addWidget(buttonBack_a);
+    HBoxLayout->addLayout(buttonBox);
+    this->setLayout(HBoxLayout);
 }

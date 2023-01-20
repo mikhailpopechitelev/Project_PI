@@ -8,28 +8,31 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+
 #начиная с какой версии сборка будет собираться
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#необходимо вставить путь к библиотеке qt
+#set(CMAKE_PREFIX_PATH "C:/Qt/6.4.0/mingw_64/lib/cmake")
+
+
+#target_compile_options(qt_cmake PUBLIC "/Zc:__cplusplus")
+
 #поиск системой сборки файлов
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
-#find_package(Qt6 REQUIRED COMPONENTS QuickWidgets)
-#find_package(Qt6 REQUIRED COMPONENTS Widgets)
-# PATHS "C:/Program Files (x86)/Graphviz/bin"
-set(CMAKE_PREFIX_PATH C:/Program Files/Graphviz/lib)
 
-find_library(CDT
-    NAMES cdt)
-find_library(CGRAPH
-    NAMES cgraph++)
-find_library(GVC
-    NAMES gvc++)
+#find_package(Qt6 REQUIRED COMPONENTS QuickWidgets)
+#find_package(Qt6 REQUIRED COMPONENTS Widgets)ww
+# PATHS "C:/Program Files (x86)/Graphviz/bin"
+
+
             #PATH "C:/Program Files/Graphviz/lib"
             #NO_CACHE )
 #из каких языков проект
 set(TS_FILES EM_project_en_GB.ts)
+
 
 
 #из каких файлов собирается проект
@@ -95,24 +98,35 @@ add_subdirectory(nlohmann_json)
 #set(PROJECT_LINK_LIBS ${GVC} )
 #set(PROJECT_LINK_LIBS ann.dll cdt.dll cgraph.dll gvc.dll gvplugin_core.dll gvplugin_dot_layout.dll gvplugin_gd.dll gvplugin_gdiplus.dll
 #gvplugin_neato_layout.dll gvplugin_pango.dll Pathplan.dll vmalloc.dll)
-#find_package(PkgConfig)
+#find_package(PkgConfig)'njn
 #pkg_check_modules(GVC REQUIRED libgvc)
 #target_include_directories(EM_project SYSTEM PUBLIC "C:/Program Files (x86)/Graphviz/bin")
 
 
-target_include_directories(EM_project SYSTEM PUBLIC "C:/Program Files/Graphviz/include/graphviz")  #${CGRAPH_LIBRARY} ${CDT_LIBRARY} ${GVC_LIBRARY}
+#добавить в деррикторию ещё и папку с include 
+target_include_directories(EM_project SYSTEM PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/include/graphviz")  #${CGRAPH_LIBRARY} ${CDT_LIBRARY} ${GVC_LIBRARY}
 
+find_library(GVC NAME gvc PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
+find_library(CDT NAME cdt PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
+find_library(CGRAPH NAME cgraph PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
 
 message("4444")
-message("${GVC}")
-message("${CDT}")
-message("${CGRAPH}")
+message("${GVC} ${CDT} ${CGRAPH}")
 message("3333")
 
+
+#target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+#    "C:/Program Files/Graphviz/lib/gvc.lib"
+#   "C:/Program Files/Graphviz/lib/cgraph.lib"
+#   "C:/Program Files/Graphviz/lib/cdt.lib"
+#    nlohmann_json::nlohmann_json)
+#"D:/Graphviz/bin/gvc.dll" "D:/Graphviz/bin/cgraph.dll" "D:/Graphviz/bin/cdt.dll"
+
+
 target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-    "C:/Program Files/Graphviz/lib/gvc.lib"
-   "C:/Program Files/Graphviz/lib/cgraph.lib"
-   "C:/Program Files/Graphviz/lib/cdt.lib"
+ ${GVC} ${CDT} ${CGRAPH}
+    #необходимо вставить нужные библиотеки
+   #"C:/Program Files/Graphviz/lib/cdt.lib" "C:/Program Files/Graphviz/lib/cgraph.lib" "C:/Program Files/Graphviz/lib/gvc.lib" #vgc.lib cgraph.lib cdt.lib
     nlohmann_json::nlohmann_json)
 
 

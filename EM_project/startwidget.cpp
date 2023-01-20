@@ -3,30 +3,100 @@
 StartWidget::StartWidget(QWidget *parent)
     : QWidget{parent}
 {
+    //создание выдвигающихся списков
+    Boxlayout = new QComboBox();
+    QStringList lst;
+    lst << "dot" << "fdp" << "neato" << "osage"<< "sfdp" << "twopi";
+    Boxlayout->addItems(lst);
+    lst.clear();
+
+    BoxStepQuarantine = new QComboBox();
+    lst << "Mask mode" << "partial isolation" << "two-week quarantine" << "complete isolation";
+    BoxStepQuarantine->addItems(lst);
+
+    //создание галочки для карантина
+    quarantine = new QCheckBox("quarantine");
+
     //инициализируем поля
     buttonBack = new QPushButton("Back");
     buttonStart = new QPushButton("Start");
-    buttonStop = new QPushButton("Stop");
+    buttonRepeat = new QPushButton("Repeat");
+
+    //заполнение надписей для стартового окна
+    QLabel* chance_sick_lbl = new QLabel("Шанс заболеть"); ;
+    QLabel* mortality_rate_lbl= new QLabel("Коэффициент летальности");
+    QLabel* distribution_lbl= new QLabel("Коэффициент распространения");
+    QLabel* health_efficiency_lbl = new QLabel("Эффективность здравоохранения");
+    countDay = new QLabel("0");
+
+    //создание счетчика от скольки процентов зараженных будет введет карантин
+    quarantinePros = new QSpinBox(this);
+    quarantinePros->setRange(0,100);
+    quarantinePros->setValue(35);
+    quarantinePros->setPrefix("quarantin: ");
+    quarantinePros->setSuffix("%");
+    quarantinePros->setButtonSymbols(QSpinBox::PlusMinus);
+    quarantinePros->setWrapping(true);
+
+    //создание счетчика от скольки процентов зараженных будет введет карантин
+    BoxstepTimer = new QSpinBox(this);
+    BoxstepTimer->setRange(0,3000);
+    BoxstepTimer->setValue(200);
+    BoxstepTimer->setSingleStep(100);
+    BoxstepTimer->setSuffix("ms");
+    BoxstepTimer->setButtonSymbols(QSpinBox::PlusMinus);
+    BoxstepTimer->setWrapping(true);
+
+    //создание счетчика дней болезни
+    sickDays = new QSpinBox(this);
+    sickDays->setRange(0,14);
+    sickDays->setValue(1);
+    sickDays->setPrefix("sick days: ");
+    sickDays->setButtonSymbols(QSpinBox::PlusMinus);
+    sickDays->setWrapping(true);
+
+    //создание счетчика инкубационный период
+    dayToRecover = new QSpinBox(this);
+    dayToRecover->setRange(0,21);
+    dayToRecover->setValue(1);
+    dayToRecover->setPrefix("incubation period: ");
+    dayToRecover->setButtonSymbols(QSpinBox::PlusMinus);
+    dayToRecover->setWrapping(true);
+
+    //создание счетчика для дней до потери имунитета
+    dayToUnrecover = new QSpinBox(this);
+    dayToUnrecover->setRange(0,365);
+    dayToUnrecover->setValue(1);
+    dayToUnrecover->setPrefix("days before the loss of immunity: ");
+    dayToUnrecover->setButtonSymbols(QSpinBox::PlusMinus);
+    dayToUnrecover->setWrapping(true);
 
     //ползунок коэффициента распространения
     distribution_с = new QSlider(Qt::Horizontal);
     distribution_с->setRange(0,10);
     distribution_с->setTickInterval(1);
-    distribution_с->setValue(1);
+    distribution_с->setValue(0);
     distribution_с->setTickPosition(QSlider::TicksBelow);
+
+    //ползунок шанса заболеть
+    chance_sick = new QSlider(Qt::Horizontal);
+    chance_sick->setRange(0,10);
+    chance_sick->setTickInterval(1);
+    chance_sick->setValue(0);
+    chance_sick->setTickPosition(QSlider::TicksBelow);
 
     //коэффициент летальности
     mortality_rate = new QSlider(Qt::Horizontal);
     mortality_rate->setRange(0,10);
     mortality_rate->setTickInterval(1);
-    mortality_rate->setValue(1);
+    mortality_rate->setValue(0);
     mortality_rate->setTickPosition(QSlider::TicksBelow);
 
     //коэйффициент эффективности здравоохранения
     health_efficiency = new QSlider(Qt::Horizontal);
     health_efficiency->setRange(0,10);
     health_efficiency->setTickInterval(1);
-    health_efficiency->setValue(1);
+    health_efficiency->setValue(0);
     health_efficiency->setTickPosition(QSlider::TicksBelow);
 
     buttonChooseFile = new QPushButton("Choose file");
@@ -38,13 +108,17 @@ StartWidget::StartWidget(QWidget *parent)
     connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
     connect(buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
     connect(buttonStart,SIGNAL(clicked()),this,SLOT(onStartButton()));
-    connect(buttonStop,SIGNAL(clicked()),this,SLOT(onStopButton()));
+    connect(buttonRepeat,SIGNAL(clicked()),this,SLOT(onButtonRepeat()));
+    connect(distribution_с,SIGNAL(valueChanged(int)),this,SLOT(onSliderdistribution()));
+    connect(health_efficiency,SIGNAL(valueChanged(int)),this,SLOT(onSliderHealthEfficiency()));
+    connect(mortality_rate,SIGNAL(valueChanged(int)),this,SLOT(onSliderMortalityRate()));
+    connect(chance_sick,SIGNAL(valueChanged(int)),this,SLOT(onChanceSick()));
+    connect(BoxstepTimer,SIGNAL(valueChanged(int)),this,SLOT(ChangeTimer(int)));
 
     //создание расположения кнопок
     QHBoxLayout* HBoxLayout = new QHBoxLayout();
     QVBoxLayout* VBoxLayoutfirst = new QVBoxLayout();
     QVBoxLayout* VBoxLayoutsecond = new QVBoxLayout();
-    QPushButton* push = new QPushButton("s");
 
     //создание таймера для кадров в секунду и шага заражения
     animatiomTimer = new QTimer(this);
@@ -56,13 +130,21 @@ StartWidget::StartWidget(QWidget *parent)
 
     //вертикальная расстановка
     VBoxLayoutfirst->addWidget(buttonStart);
-    VBoxLayoutfirst->addWidget(buttonStop);
+    VBoxLayoutfirst->addWidget(buttonRepeat);
+    VBoxLayoutfirst->addWidget(distribution_lbl);
     VBoxLayoutfirst->addWidget(distribution_с);
+    VBoxLayoutfirst->addWidget(chance_sick_lbl);
+    VBoxLayoutfirst->addWidget(chance_sick);
+    VBoxLayoutfirst->addWidget(mortality_rate_lbl);
     VBoxLayoutfirst->addWidget(mortality_rate);
+    VBoxLayoutfirst->addWidget(health_efficiency_lbl);
     VBoxLayoutfirst->addWidget(health_efficiency);
+    VBoxLayoutfirst->addWidget(sickDays);
+    VBoxLayoutfirst->addWidget(dayToRecover);
+    VBoxLayoutfirst->addWidget(dayToUnrecover);
+    VBoxLayoutfirst->addWidget(quarantinePros);
     VBoxLayoutfirst->addWidget(buttonChooseFile);
     VBoxLayoutfirst->addWidget(buttonBack);
-
 
     //расстановка слева на право
     HBoxLayout->addLayout(VBoxLayoutfirst);
@@ -71,7 +153,11 @@ StartWidget::StartWidget(QWidget *parent)
     HBoxLayout->addWidget(view);
 
     //добавление левой расстановки
-    VBoxLayoutsecond->addWidget(push);
+    VBoxLayoutsecond->addWidget(BoxstepTimer);
+    VBoxLayoutsecond->addWidget(countDay);
+    VBoxLayoutsecond->addWidget(Boxlayout);
+    VBoxLayoutsecond->addWidget(BoxStepQuarantine);
+    VBoxLayoutsecond->addWidget(quarantine);
     HBoxLayout->addLayout(VBoxLayoutsecond);
 
     this->setLayout(HBoxLayout);
@@ -82,10 +168,14 @@ void StartWidget::slotButtonChoose(){
     //получает ссылку на файл и приводит её к типу строки
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
-                                       "All Files (*.*);; GRAPH (*.graph);; TRIVIAL (*.tgf);; DOT (*.dot);; TXT (*.txt);");
+                                       "GRAPH (*.graph);; DOT (*.dot);; TXT (*.txt);");
 
     std::string URL = url.toStdString();
     if(URL != ""){
+        this->URL = URL;
+        if(buttonStart->text()!="Start"){
+            buttonStart->setText("Start");
+        }
         Vec_Item.clear();
         adjacency_list.clear();
         loadfile(URL);
@@ -94,13 +184,16 @@ void StartWidget::slotButtonChoose(){
     }
 }
 
-void StartWidget::onStepTimer(){  
+void StartWidget::onStepTimer(){
+
+    daySimulation++;
+    countDay->setNum(daySimulation);
     //количество зараженных
     std::vector<int> tmp;
 
     //подсчет количество зараженных вершин
     for (size_t i = 0; i < Vec_Item.size(); ++i) {
-        if((Vec_Item[i]->isSick())||(Vec_Item[i]->isInfectd())){ //
+        if((Vec_Item[i]->isSick())||(Vec_Item[i]->isInfectd())){
             tmp.push_back(i);
         }
     }
@@ -109,32 +202,55 @@ void StartWidget::onStepTimer(){
     for (size_t i = 0; i < tmp.size(); ++i) {
         for (size_t j = 0; j < adjacency_list[tmp[i]].size(); ++j) {
             if((!adjacency_list[tmp[i]][j]->isRecover())&&(!adjacency_list[tmp[i]][j]->isDead())){
-                if(rand()%1==0){ //коэффициент распространения
-                    adjacency_list[tmp[i]][j]->infected(); //sick
+                int k = 10;
+                if(quarantine->isChecked()){
+                    if(((tmp.size()*100)/Vec_Item.size())>=quarantinePros->value()){
+                        if(BoxStepQuarantine->currentText()=="Mask mode"){// "Mask mode" << "partial isolation" << "two-week quarantine" << "complete isolation"
+                            k=8;
+                        }else if(BoxStepQuarantine->currentText()=="partial isolation"){
+                            k=6;
+                        }else if(BoxStepQuarantine->currentText()=="two-week quarantine"){
+                            k=4;
+                        }else if(BoxStepQuarantine->currentText()=="complete isolation"){
+                            k=1;
+                        }
+                        if(rand()%100 < m_distribution_с*k){ //коэффициент распространения поменять на константу
+                            adjacency_list[tmp[i]][j]->infected(); //sick
+                        }
+                    }else{
+                        if(rand()%10 < m_distribution_с){ //коэффициент распространения поменять на константу
+                            adjacency_list[tmp[i]][j]->infected(); //sick
+                        }
+                    }
+                }else{
+                    if(rand()%10 < m_distribution_с){ //коэффициент распространения поменять на константу
+                        adjacency_list[tmp[i]][j]->infected(); //sick
+                    }
                 }
+
             }
         }
     }
-
     //для каждой верины подсчет количества её дней болезни
     for (size_t i = 0; i < Vec_Item.size(); ++i) {
-        if(Vec_Item[i]->isInfectd()){
+        if((Vec_Item[i]->isInfectd())&&(!Vec_Item[i]->isSick())){
             Vec_Item[i]->day_sick++;
-            if(Vec_Item[i]->day_sick==3){//шанс заболеть
-                if((rand()%2==0)){
+            if(Vec_Item[i]->day_sick==dayToRecover->value()){
+                if((rand()%10 < m_chance_sick)){//шанс заболеть
+                    Vec_Item[i]->sick();
+                }else{
                     Vec_Item[i]->recover();
                     Vec_Item[i]->day_sick=0;
-                }else{
-                    Vec_Item[i]->sick();
                 }
             }
         }
         if(Vec_Item[i]->isSick()){
             Vec_Item[i]->day_sick++;
-            if(Vec_Item[i]->day_sick==8){// 8 - 3 количество дней для выздоровления
-                if(rand()%10==0){//коэффициент мсертности
+            if(Vec_Item[i]->day_sick==dayToRecover->value()+sickDays->value()){// 8 - 3 количество дней для выздоровления
+                if(rand()%10 < m_mortality_rate){//коэффициент мсертности
                     Vec_Item[i]->dead();
                     Vec_Item[i]->day_sick=0;
+                    countDead++;
                 }else{
                     Vec_Item[i]->recover();
                     Vec_Item[i]->day_sick=0;
@@ -143,7 +259,7 @@ void StartWidget::onStepTimer(){
         }
         if(Vec_Item[i]->isRecover()){
             Vec_Item[i]->day_recovered++;
-            if(Vec_Item[i]->day_recovered==3){
+            if(Vec_Item[i]->day_recovered==dayToUnrecover->value()){
                 Vec_Item[i]->unrecovered();
                 Vec_Item[i]->day_recovered=0;
             }
@@ -240,7 +356,9 @@ void StartWidget::loadfile(const std::string& URL){
             G = agmemread(s.c_str());
 
             //расположение графа
-            gvLayout(gvc, G, "neato"); // dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi
+            QString tmpQ = Boxlayout->currentText();
+            const char* tmp = tmpQ.toStdString().c_str();
+            gvLayout(gvc, G, tmp); // dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi
 
             //создание узлов и ребер
             Agnode_t* n;
@@ -327,6 +445,7 @@ MyQGraphicsRectItem* StartWidget::CreateMyItamVerties(const int& x,const int& y,
 MyQGraphicsRectItem* MyItem = new MyQGraphicsRectItem(x,y,r);
 MyItem->setPen(pen);
 MyItem->setBrush(brush);
+
 return MyItem;
 }
 
@@ -407,12 +526,13 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
     int font_size=view->width()/200;
     //qreal font_size = 0.75/3;
     //создание всех ребер
+
     for (size_t i = 0; i < mas.first.size(); ++i) {
         QGraphicsLineItem* MyItem = CreateItamEdges(mas.first[i].get_vertices_from().get_x(),
                                                     mas.first[i].get_vertices_from().get_y(),
                                                     mas.first[i].get_vertices_to().get_x(),
                                                     mas.first[i].get_vertices_to().get_y(),
-                                                    QPen(Qt::black,font_size,Qt::SolidLine));
+                                                    QPen(Qt::gray,font_size,Qt::SolidLine));
         scen->addItem(MyItem);
         //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
     }
@@ -434,7 +554,7 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
         if(mas.second[i].get_m_name()==""){
             MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
                                                              mas.second[i].get_y(),view->width()/70,//view->width()/70,std::sqrt((scen->width()*scen->height())/(75*Vec_Item.size()))
-                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QPen(Qt::gray,1,Qt::SolidLine),
                                                              QBrush(Qt::blue));
             Vec_Item[i]=(MyItem);
             scen->addItem(MyItem);
@@ -448,7 +568,7 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
         }else{
             MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
                                                              mas.second[i].get_y(),view->width()/70,//view->width()/70,std::sqrt((scen->width()*scen->height())/(75*Vec_Item.size()))
-                                                             QPen(Qt::black,1,Qt::SolidLine),
+                                                             QPen(Qt::gray,1,Qt::SolidLine),
                                                              QBrush(Qt::blue));
             Vec_Item[i]=(MyItem);
             scen->addItem(MyItem);
@@ -488,10 +608,49 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
 };
 
 void StartWidget::onStartButton(){
-    scen->update();
-    stepTimer->start(100);
+    if(URL!=""){
+        if((buttonStart->text()=="Start")||(buttonStart->text()=="Сontinue")){
+            buttonStart->setText("Stop");
+            scen->update();
+            stepTimer->start(BoxstepTimer->value());
+        }else{
+            buttonStart->setText("Сontinue");
+            stepTimer->stop();
+        }
+    }
 }
 
-void StartWidget::onStopButton(){
-    stepTimer->stop();
+void StartWidget::onSliderdistribution(){
+    this->m_distribution_с = distribution_с->sliderPosition();
+}
+
+void StartWidget::onSliderHealthEfficiency(){
+    this->m_health_efficiency = health_efficiency->sliderPosition();
+}
+
+void StartWidget::onSliderMortalityRate(){
+    this->m_mortality_rate = mortality_rate->sliderPosition();
+}
+
+void StartWidget::onChanceSick(){
+    this->m_chance_sick = chance_sick->sliderPosition();
+}
+
+void StartWidget::onButtonRepeat(){
+    if(URL!=""){
+        if(buttonStart->text()!="Start"){
+            buttonStart->setText("Start");
+        }
+        Vec_Item.clear();
+        adjacency_list.clear();
+        loadfile(URL);
+        Vec_Item[0]->infected();
+        stepTimer->stop();
+        countDay->setNum(0);
+        daySimulation = 0;
+    }
+}
+
+void StartWidget::ChangeTimer(int step){
+    stepTimer->setInterval(step);
 }

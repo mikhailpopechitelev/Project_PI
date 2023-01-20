@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 8.0.1, 2022-12-16T07:51:06. -->
+<!-- Written by QtCreator 8.0.1, 2023-01-20T18:53:43. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -103,7 +103,6 @@
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
 -DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}</value>
     <value type="QString" key="CMake.Source.Directory">C:\Users\user\Desktop\Project_PI\EM_project</value>
-    <value type="int" key="EnableQmlDebugging">0</value>
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\user\Desktop\Project_PI\build-EM_project-Desktop_Qt_6_4_0_MinGW_64_bit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">

@@ -15,6 +15,11 @@
 #include <QTimer>
 #include <nlohmann_json/include/nlohmann/json.hpp>
 #include <QLabel>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QMenu>
+#include <QComboBox>
+
 //#include <matplot/matplot.h>
 #include<gvc.h>
 
@@ -60,28 +65,49 @@ signals:
 public slots:
 
     void slotButtonChoose();
+    void onButtonRepeat();
     void onStepTimer();
     void onStartButton();
-    void onStopButton();
+    void onSliderdistribution();
+    void onSliderMortalityRate();
+    void onSliderHealthEfficiency();
+    void onChanceSick();
+    void ChangeTimer(int);
 
 private:
 
-    QSlider* mortality_rate;
-    QSlider* health_efficiency;
-    QSlider* distribution_с;
+    int countDead=0;
+    int daySimulation = 0;
+    QLabel* countDay = nullptr;
+    QComboBox* BoxStepQuarantine = nullptr;
+    QComboBox* Boxlayout=nullptr;
+    QSpinBox* BoxstepTimer = nullptr;
+    QCheckBox* quarantine = nullptr;
+    QSpinBox* sickDays= nullptr;
+    QSpinBox* dayToRecover= nullptr;
+    QSpinBox* quarantinePros= nullptr;
+    QSpinBox* dayToUnrecover= nullptr;
+    QSlider* chance_sick= nullptr;
+    QSlider* mortality_rate= nullptr;
+    QSlider* health_efficiency= nullptr;
+    QSlider* distribution_с= nullptr;
     std::vector<MyQGraphicsRectItem*> Vec_Item;
     //std::vector<QGraphicsLineItem*> Vec_Imem_edges;
     std::vector<std::vector<MyQGraphicsRectItem*>> adjacency_list;
-    QTimer* stepTimer;
-    QGraphicsScene* scen;
-    MyGraphicsView* view;
-    QPushButton* buttonStop;
-    QPushButton* buttonBack;
-    QPushButton* buttonStart;
-    QPushButton* buttonChooseFile;
-    QTimer* animatiomTimer;
-    int m_sick;
-
+    QTimer* stepTimer= nullptr;
+    QGraphicsScene* scen= nullptr;
+    MyGraphicsView* view= nullptr;
+    QPushButton* buttonRepeat= nullptr;
+    QPushButton* buttonBack= nullptr;
+    QPushButton* buttonStart= nullptr;
+    QPushButton* buttonChooseFile= nullptr;
+    QTimer* animatiomTimer= nullptr;
+    int m_chance_sick=0;
+    int m_sick=0;
+    int m_mortality_rate=0;
+    int m_health_efficiency=0;
+    int m_distribution_с=0;
+    std::string URL= "";
 
 };
 

@@ -17,7 +17,7 @@ public:
 
 private:
 
-    QPushButton* buttonBack;
+    QPushButton* buttonBack_a;
 
 signals:
 

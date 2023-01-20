@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QApplication::setStyle("QFusionStyle");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
@@ -20,8 +21,8 @@ int main(int argc, char *argv[])
     }
 
     EM_proj main;
-    main.resize(800,600);
-    main.show();
+    //main.resize(800,600);
+    main.showFullScreen();
 
 
     return a.exec();
