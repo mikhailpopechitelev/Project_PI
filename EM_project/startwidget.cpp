@@ -11,16 +11,16 @@ StartWidget::StartWidget(QWidget *parent)
     lst.clear();
 
     BoxStepQuarantine = new QComboBox();
-    lst << "Mask mode" << "partial isolation" << "two-week quarantine" << "complete isolation";
+    lst << "Масочный режим" << "Частичная изоляция" << "Двухнедельный карантин" << "Полная изоляция";
     BoxStepQuarantine->addItems(lst);
 
     //создание галочки для карантина
-    quarantine = new QCheckBox("quarantine");
+    quarantine = new QCheckBox("Карантин");
 
     //инициализируем поля
-    buttonBack = new QPushButton("Back");
-    buttonStart = new QPushButton("Start");
-    buttonRepeat = new QPushButton("Repeat");
+    buttonBack = new QPushButton("Назад");
+    buttonStart = new QPushButton("Начать");
+    buttonRepeat = new QPushButton("Повторить");
 
     //заполнение надписей для стартового окна
     QLabel* chance_sick_lbl = new QLabel("Шанс заболеть"); ;
@@ -33,7 +33,7 @@ StartWidget::StartWidget(QWidget *parent)
     quarantinePros = new QSpinBox(this);
     quarantinePros->setRange(0,100);
     quarantinePros->setValue(35);
-    quarantinePros->setPrefix("quarantin: ");
+    quarantinePros->setPrefix("Карантин: ");
     quarantinePros->setSuffix("%");
     quarantinePros->setButtonSymbols(QSpinBox::PlusMinus);
     quarantinePros->setWrapping(true);
@@ -43,7 +43,7 @@ StartWidget::StartWidget(QWidget *parent)
     BoxstepTimer->setRange(0,3000);
     BoxstepTimer->setValue(200);
     BoxstepTimer->setSingleStep(100);
-    BoxstepTimer->setSuffix("ms");
+    BoxstepTimer->setSuffix("мс");
     BoxstepTimer->setButtonSymbols(QSpinBox::PlusMinus);
     BoxstepTimer->setWrapping(true);
 
@@ -51,7 +51,7 @@ StartWidget::StartWidget(QWidget *parent)
     sickDays = new QSpinBox(this);
     sickDays->setRange(0,14);
     sickDays->setValue(1);
-    sickDays->setPrefix("sick days: ");
+    sickDays->setPrefix("Дни болезни: ");
     sickDays->setButtonSymbols(QSpinBox::PlusMinus);
     sickDays->setWrapping(true);
 
@@ -59,7 +59,7 @@ StartWidget::StartWidget(QWidget *parent)
     dayToRecover = new QSpinBox(this);
     dayToRecover->setRange(0,21);
     dayToRecover->setValue(1);
-    dayToRecover->setPrefix("incubation period: ");
+    dayToRecover->setPrefix("Инкубационный период: ");
     dayToRecover->setButtonSymbols(QSpinBox::PlusMinus);
     dayToRecover->setWrapping(true);
 
@@ -67,7 +67,7 @@ StartWidget::StartWidget(QWidget *parent)
     dayToUnrecover = new QSpinBox(this);
     dayToUnrecover->setRange(0,365);
     dayToUnrecover->setValue(1);
-    dayToUnrecover->setPrefix("days before the loss of immunity: ");
+    dayToUnrecover->setPrefix("Дней до потери иммунитета: ");
     dayToUnrecover->setButtonSymbols(QSpinBox::PlusMinus);
     dayToUnrecover->setWrapping(true);
 
@@ -99,7 +99,7 @@ StartWidget::StartWidget(QWidget *parent)
     health_efficiency->setValue(0);
     health_efficiency->setTickPosition(QSlider::TicksBelow);
 
-    buttonChooseFile = new QPushButton("Choose file");
+    buttonChooseFile = new QPushButton("Выбрать файл");
     scen = new QGraphicsScene(QRectF(-500,-500,1000,1000));
     view = new MyGraphicsView(scen);
     m_sick = 0;
@@ -173,8 +173,8 @@ void StartWidget::slotButtonChoose(){
     std::string URL = url.toStdString();
     if(URL != ""){
         this->URL = URL;
-        if(buttonStart->text()!="Start"){
-            buttonStart->setText("Start");
+        if(buttonStart->text()!="Начать"){
+            buttonStart->setText("Начать");
         }
         Vec_Item.clear();
         adjacency_list.clear();
@@ -205,13 +205,13 @@ void StartWidget::onStepTimer(){
                 int k = 10;
                 if(quarantine->isChecked()){
                     if(((tmp.size()*100)/Vec_Item.size())>=quarantinePros->value()){
-                        if(BoxStepQuarantine->currentText()=="Mask mode"){// "Mask mode" << "partial isolation" << "two-week quarantine" << "complete isolation"
+                        if(BoxStepQuarantine->currentText()=="Масочный режим"){// "Mask mode" << "partial isolation" << "two-week quarantine" << "complete isolation"
                             k=8;
-                        }else if(BoxStepQuarantine->currentText()=="partial isolation"){
+                        }else if(BoxStepQuarantine->currentText()=="Частичная изоляция"){
                             k=6;
-                        }else if(BoxStepQuarantine->currentText()=="two-week quarantine"){
+                        }else if(BoxStepQuarantine->currentText()=="Двухнедельный карантин"){
                             k=4;
-                        }else if(BoxStepQuarantine->currentText()=="complete isolation"){
+                        }else if(BoxStepQuarantine->currentText()=="Полная изоляция"){
                             k=1;
                         }
                         if(rand()%100 < m_distribution_с*k){ //коэффициент распространения поменять на константу
@@ -609,12 +609,12 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
 
 void StartWidget::onStartButton(){
     if(URL!=""){
-        if((buttonStart->text()=="Start")||(buttonStart->text()=="Сontinue")){
-            buttonStart->setText("Stop");
+        if((buttonStart->text()=="Начаит")||(buttonStart->text()=="Продолжить")){
+            buttonStart->setText("Остановить");
             scen->update();
             stepTimer->start(BoxstepTimer->value());
         }else{
-            buttonStart->setText("Сontinue");
+            buttonStart->setText("Продолжить");
             stepTimer->stop();
         }
     }
@@ -638,8 +638,8 @@ void StartWidget::onChanceSick(){
 
 void StartWidget::onButtonRepeat(){
     if(URL!=""){
-        if(buttonStart->text()!="Start"){
-            buttonStart->setText("Start");
+        if(buttonStart->text()!="Начать"){
+            buttonStart->setText("Начать");
         }
         Vec_Item.clear();
         adjacency_list.clear();

@@ -4,9 +4,9 @@ Menu::Menu(QWidget *parent)
     : QWidget{parent}
 {
     //поля стартового приложения
-    start = new QPushButton("Start");
+    start = new QPushButton("Старт");
     //authors = new QPushButton("Authors");
-    quit = new QPushButton("Quit");
+    quit = new QPushButton("Выход");
 
     //подключение кнопок меню
     connect(start,SIGNAL(clicked()),parent,SLOT(slotButtonStart()));

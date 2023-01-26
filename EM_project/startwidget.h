@@ -25,7 +25,9 @@
 
 
 
-
+/**
+*  @brief класс окна в котором настраивается симуляция
+*/
 class StartWidget: public QWidget
 {
     Q_OBJECT
@@ -37,45 +39,76 @@ public:
 
     void sendButtonQuite();
 
-    //загрузка файла и его парсер через *.graph и *.tgf
+    /**
+    *  @brief функция загрузки файла в программу (память)
+    *  @param url ссылка на логический граф
+    */
     void loadfile(const std::string& url);
-
-    //работа с графами считанными из файла
     void parseTgf(const std::string& url,std::vector<std::string>& edges_name,
                   std::vector<std::pair<size_t,size_t>>& edges);
 
-    //отрисовка графа по списку вершин и ребер
+    /**
+    *  @brief функция отрисовывающая граф на сцене
+    *  @param mas список вершин и ребер
+    */
     void addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas);
 
-    //нахождение крайних точек для графа, чтобы изменить рзамер сцены и поставить его по середине
+    //!нахождение крайних точек для графа, чтобы изменить рзамер сцены и поставить его по середине
     std::vector<std::pair<int,int>> findMinPointMaxPoint(
               std::pair<std::vector<Edges>,std::vector<Vertices>>& mas);
 
     //методы создания вершин и ребер
     //QGraphicsRectItem* CreateItamRectverties(const int& x,const int& y,const int& r,const QPen& pen, const QBrush& brush);
+    /**
+    *  @brief конструктор ребра
+    *  @param x1 координата x начала
+    *  @param x2 координата x конца
+    *  @param y1 координата y начала
+    *  @param y2 координата y конца
+    *  @param pen стиль каисточки для отрисовки
+    *  @return ребро
+    */
     QGraphicsLineItem* CreateItamEdges(const int& x1,const int& y1,
                                    const int& x2,const int& y2,
                                    const QPen& pen);
+    /**
+    *  @brief конструктор узла
+    *  @param x координата x центра узла
+    *  @param y координата y центра узла
+    *  @param r радиус узла
+    *  @param brush кисть для заливки
+    *  @param pen стиль каисточки для отрисовки
+    *  @return ребро
+    */
     MyQGraphicsRectItem* CreateMyItamVerties(const int& x,const int& y,const qreal& r,
                                              const QPen& pen, const QBrush& brush);
     std::string readFile(const std::string& str);
 signals:
+    //!сигнал отсылающийся при нажатии на кнопку
     void signalFromButton(QString str);
 
 public slots:
 
+    //! слот кнопки выбора файла
     void slotButtonChoose();
+    //! слот кнопки повтора
     void onButtonRepeat();
+    //! слот кнопки шага таймера
     void onStepTimer();
+    //! слот кнопки старта
     void onStartButton();
+    //! слот прокрутки ползунков
     void onSliderdistribution();
     void onSliderMortalityRate();
     void onSliderHealthEfficiency();
+    //! слот шанса заболеть в такт таймера
     void onChanceSick();
+    //! слот начала таймера
     void ChangeTimer(int);
 
 private:
 
+    //!поля стартовой настройки симуляции
     int countDead=0;
     int daySimulation = 0;
     QLabel* countDay = nullptr;

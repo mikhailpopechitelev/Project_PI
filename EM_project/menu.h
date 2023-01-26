@@ -8,21 +8,25 @@
 #include <QStackedWidget>
 #include <QWidget>
 #include <QDebug>
-
+/**
+*  @brief класс стартового меня унаследованного от QWidget
+*/
 class Menu : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    //конструтор меню
+    /**
+    *  @brief конструктор меню начального
+    */
     explicit Menu(QWidget *parent = nullptr);
 
 signals:
 
 
 private:
-    //поля стартового приложения
+    //!поля стартового приложения
     QPushButton* start;
     QPushButton* authors;
     QPushButton* quit;
