@@ -8,7 +8,6 @@
 #include <QStackedWidget>
 #include <QWidget>
 
-
 class Authors : public QWidget
 {
     Q_OBJECT

@@ -19,9 +19,9 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QComboBox>
+#include <Graphviz/include/graphviz/gvc.h>
+//#include <gvc.h>
 
-//#include <matplot/matplot.h>
-#include<gvc.h>
 
 
 

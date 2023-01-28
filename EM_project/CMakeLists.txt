@@ -1,20 +1,24 @@
+
 cmake_minimum_required(VERSION 3.5)
 
 project(EM_project VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+
+########################################################################################
+#вместо CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/install можно прописать путь куда хотите произвести сборку"
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install")
 
 #начиная с какой версии сборка будет собираться
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}")
-
-#необходимо вставить путь к библиотеке qt
+#необходимо вставить путь к библиотеке qt для работы find_package
 #set(CMAKE_PREFIX_PATH "C:/Qt/6.4.0/mingw_64/lib/cmake")
 
 #поиск системой сборки файлов
@@ -67,29 +71,36 @@ else()
 endif()
 
 
-#подключение библиотек
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(nlohmann_json)
 
 #добавить в деррикторию ещё и папку с include 
-target_include_directories(EM_project SYSTEM PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/include/graphviz")  #${CGRAPH_LIBRARY} ${CDT_LIBRARY} ${GVC_LIBRARY}
+#target_include_directories(EM_project SYSTEM PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")  #${CGRAPH_LIBRARY} ${CDT_LIBRARY} ${GVC_LIBRARY}
 
-find_library(GVC NAME gvc PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
-find_library(CDT NAME cdt PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
-find_library(CGRAPH NAME cgraph PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin")
+# поиск необходимых библиотек graphviz
+find_library(GVC NAME gvc PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib")
+find_library(CDT NAME cdt PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib")
+find_library(CGRAPH NAME cgraph PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib")
 
+#для отладки
 message("4444")
-message("${GVC} ${CDT} ${CGRAPH} ${CMAKE_CURRENT_SOURCE_DIR}")
+message("${GVC} ; ${CDT}; ${CGRAPH}; ${CMAKE_CURRENT_SOURCE_DIR}; ${CMAKE_CURRENT_BINARY_DIR}"
+;${CMAKE_INSTALL_PREFIX})
 message("3333")
 
-target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
- ${GVC} ${CDT} ${CGRAPH} nlohmann_json::nlohmann_json
+#подключение библиотек
+ target_link_libraries(EM_project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+   ${GVC} ${CDT} ${CGRAPH}
+   nlohmann_json::nlohmann_json
 
 #################################################################################################################
 #необходимо вставить нужные библиотеки если find_library не найдет их
 #"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib/cdt.lib"
 #"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib/cgraph.lib"
 #"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/lib/gvc.lib"
+#"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin/cdt.dll"
+#"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin/cgraph.dll"
+#"${CMAKE_CURRENT_SOURCE_DIR}/Graphviz/bin/gvc.dll"
 ################################################################################################################
 
 )
@@ -112,5 +123,9 @@ endif()
 
 
 install(TARGETS EM_project
-    BUNDLE DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-    LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Graphviz/lib)
+    CONFIGURATIONS Release
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
+#на случай если find_library найдет не статическую ,а динамическую библиотеку (не знаю почему но такое бывает)
+install(FILES ${GVC} ${CDT} ${CGRAPH} DESTINATION ${CMAKE_INSTALL_PREFIX})
+
