@@ -1,9 +1,10 @@
 #include <startwidget.h>
-
+//!основная часть проекта. Окно настройки симуляции распространения.
+///\code
 StartWidget::StartWidget(QWidget *parent)
     : QWidget{parent}
 {
-    //создание выдвигающихся списков
+    //!создание выдвигающихся списков
     Boxlayout = new QComboBox();
     QStringList lst;
     lst << "dot" << "fdp" << "neato" << "osage"<< "sfdp" << "twopi";
@@ -14,22 +15,22 @@ StartWidget::StartWidget(QWidget *parent)
     lst << "Масочный режим" << "Частичная изоляция" << "Двухнедельный карантин" << "Полная изоляция";
     BoxStepQuarantine->addItems(lst);
 
-    //создание галочки для карантина
+    //!создание галочки для карантина
     quarantine = new QCheckBox("Карантин");
 
-    //инициализируем поля
+    //!инициализируем поля
     buttonBack = new QPushButton("Назад");
     buttonStart = new QPushButton("Начать");
     buttonRepeat = new QPushButton("Повторить");
 
-    //заполнение надписей для стартового окна
+    //!заполнение надписей для стартового окна
     QLabel* chance_sick_lbl = new QLabel("Шанс заболеть"); ;
     QLabel* mortality_rate_lbl= new QLabel("Коэффициент летальности");
     QLabel* distribution_lbl= new QLabel("Коэффициент распространения");
     QLabel* health_efficiency_lbl = new QLabel("Эффективность здравоохранения");
     countDay = new QLabel("0");
 
-    //создание счетчика от скольки процентов зараженных будет введет карантин
+    //!создание счетчика от скольки процентов зараженных будет введет карантин
     quarantinePros = new QSpinBox(this);
     quarantinePros->setRange(0,100);
     quarantinePros->setValue(35);
@@ -38,7 +39,7 @@ StartWidget::StartWidget(QWidget *parent)
     quarantinePros->setButtonSymbols(QSpinBox::PlusMinus);
     quarantinePros->setWrapping(true);
 
-    //создание счетчика от скольки процентов зараженных будет введет карантин
+    //!создание счетчика от скольки процентов зараженных будет введет карантин
     BoxstepTimer = new QSpinBox(this);
     BoxstepTimer->setRange(0,3000);
     BoxstepTimer->setValue(200);
@@ -47,7 +48,7 @@ StartWidget::StartWidget(QWidget *parent)
     BoxstepTimer->setButtonSymbols(QSpinBox::PlusMinus);
     BoxstepTimer->setWrapping(true);
 
-    //создание счетчика дней болезни
+    //!создание счетчика дней болезни
     sickDays = new QSpinBox(this);
     sickDays->setRange(0,14);
     sickDays->setValue(1);
@@ -55,7 +56,7 @@ StartWidget::StartWidget(QWidget *parent)
     sickDays->setButtonSymbols(QSpinBox::PlusMinus);
     sickDays->setWrapping(true);
 
-    //создание счетчика инкубационный период
+    //!создание счетчика инкубационный период
     dayToRecover = new QSpinBox(this);
     dayToRecover->setRange(0,21);
     dayToRecover->setValue(1);
@@ -63,7 +64,7 @@ StartWidget::StartWidget(QWidget *parent)
     dayToRecover->setButtonSymbols(QSpinBox::PlusMinus);
     dayToRecover->setWrapping(true);
 
-    //создание счетчика для дней до потери имунитета
+    //!создание счетчика для дней до потери имунитета
     dayToUnrecover = new QSpinBox(this);
     dayToUnrecover->setRange(0,365);
     dayToUnrecover->setValue(1);
@@ -78,14 +79,14 @@ StartWidget::StartWidget(QWidget *parent)
     distribution_с->setValue(0);
     distribution_с->setTickPosition(QSlider::TicksBelow);
 
-    //ползунок шанса заболеть
+    //!ползунок шанса заболеть
     chance_sick = new QSlider(Qt::Horizontal);
     chance_sick->setRange(0,10);
     chance_sick->setTickInterval(1);
     chance_sick->setValue(0);
     chance_sick->setTickPosition(QSlider::TicksBelow);
 
-    //коэффициент летальности
+    //!коэффициент летальности
     mortality_rate = new QSlider(Qt::Horizontal);
     mortality_rate->setRange(0,10);
     mortality_rate->setTickInterval(1);
@@ -104,7 +105,7 @@ StartWidget::StartWidget(QWidget *parent)
     view = new MyGraphicsView(scen);
     m_sick = 0;
 
-    //подключение кнопок приложения
+    //!подключение кнопок приложения
     connect(buttonBack,SIGNAL(clicked()),parent,SLOT(slotButtonBack()));
     connect(buttonChooseFile,SIGNAL(clicked()),this,SLOT(slotButtonChoose()));
     connect(buttonStart,SIGNAL(clicked()),this,SLOT(onStartButton()));
@@ -115,20 +116,20 @@ StartWidget::StartWidget(QWidget *parent)
     connect(chance_sick,SIGNAL(valueChanged(int)),this,SLOT(onChanceSick()));
     connect(BoxstepTimer,SIGNAL(valueChanged(int)),this,SLOT(ChangeTimer(int)));
 
-    //создание расположения кнопок
+    //!создание расположения кнопок
     QHBoxLayout* HBoxLayout = new QHBoxLayout();
     QVBoxLayout* VBoxLayoutfirst = new QVBoxLayout();
     QVBoxLayout* VBoxLayoutsecond = new QVBoxLayout();
 
-    //создание таймера для кадров в секунду и шага заражения
+    //!создание таймера для кадров в секунду и шага заражения
     animatiomTimer = new QTimer(this);
     stepTimer = new QTimer(this);
 
-    //подключение сигналов для StartWidget
+    //!подключение сигналов для StartWidget
     connect(animatiomTimer,SIGNAL(timeout()),scen,SLOT(advance()));
     connect(stepTimer,SIGNAL(timeout()),this,SLOT(onStepTimer()));
 
-    //вертикальная расстановка
+    //!вертикальная расстановка
     VBoxLayoutfirst->addWidget(buttonStart);
     VBoxLayoutfirst->addWidget(buttonRepeat);
     VBoxLayoutfirst->addWidget(distribution_lbl);
@@ -146,13 +147,13 @@ StartWidget::StartWidget(QWidget *parent)
     VBoxLayoutfirst->addWidget(buttonChooseFile);
     VBoxLayoutfirst->addWidget(buttonBack);
 
-    //расстановка слева на право
+    //!расстановка слева на право
     HBoxLayout->addLayout(VBoxLayoutfirst);
 
-    //добавлене в центр виджета
+    //!добавлене в центр виджета
     HBoxLayout->addWidget(view);
 
-    //добавление левой расстановки
+    //!добавление левой расстановки
     VBoxLayoutsecond->addWidget(BoxstepTimer);
     VBoxLayoutsecond->addWidget(countDay);
     VBoxLayoutsecond->addWidget(Boxlayout);
@@ -163,9 +164,9 @@ StartWidget::StartWidget(QWidget *parent)
     this->setLayout(HBoxLayout);
 }
 
-//слот выбора файла через диалоговое окно
+//!слот выбора файла через диалоговое окно
 void StartWidget::slotButtonChoose(){
-    //получает ссылку на файл и приводит её к типу строки
+    //!получает ссылку на файл и приводит её к типу строки
     QString url;
     url = QFileDialog::getOpenFileName(this,"Выбрать файл","C:\\",
                                        "GRAPH (*.graph);; DOT (*.dot);; TXT (*.txt);");
@@ -188,17 +189,17 @@ void StartWidget::onStepTimer(){
 
     daySimulation++;
     countDay->setNum(daySimulation);
-    //количество зараженных
+    //!количество зараженных
     std::vector<int> tmp;
 
-    //подсчет количество зараженных вершин
+    //!подсчет количество зараженных вершин
     for (size_t i = 0; i < Vec_Item.size(); ++i) {
         if((Vec_Item[i]->isSick())||(Vec_Item[i]->isInfectd())){
             tmp.push_back(i);
         }
     }
 
-    //заражение всех соседних клеток для вершины
+    //!заражение всех соседних клеток для вершины
     for (size_t i = 0; i < tmp.size(); ++i) {
         for (size_t j = 0; j < adjacency_list[tmp[i]].size(); ++j) {
             if((!adjacency_list[tmp[i]][j]->isRecover())&&(!adjacency_list[tmp[i]][j]->isDead())){
@@ -214,16 +215,16 @@ void StartWidget::onStepTimer(){
                         }else if(BoxStepQuarantine->currentText()=="Полная изоляция"){
                             k=1;
                         }
-                        if(rand()%100 < m_distribution_с*k){ //коэффициент распространения поменять на константу
+                        if(rand()%100 < m_distribution_с*k){ //!коэффициент распространения поменять на константу
                             adjacency_list[tmp[i]][j]->infected(); //sick
                         }
                     }else{
-                        if(rand()%10 < m_distribution_с){ //коэффициент распространения поменять на константу
+                        if(rand()%10 < m_distribution_с){ //!коэффициент распространения поменять на константу
                             adjacency_list[tmp[i]][j]->infected(); //sick
                         }
                     }
                 }else{
-                    if(rand()%10 < m_distribution_с){ //коэффициент распространения поменять на константу
+                    if(rand()%10 < m_distribution_с){ //!коэффициент распространения поменять на константу
                         adjacency_list[tmp[i]][j]->infected(); //sick
                     }
                 }
@@ -231,7 +232,7 @@ void StartWidget::onStepTimer(){
             }
         }
     }
-    //для каждой верины подсчет количества её дней болезни
+    //!для каждой верины подсчет количества её дней болезни
     for (size_t i = 0; i < Vec_Item.size(); ++i) {
         if((Vec_Item[i]->isInfectd())&&(!Vec_Item[i]->isSick())){
             Vec_Item[i]->day_sick++;
@@ -247,7 +248,7 @@ void StartWidget::onStepTimer(){
         if(Vec_Item[i]->isSick()){
             Vec_Item[i]->day_sick++;
             if(Vec_Item[i]->day_sick==dayToRecover->value()+sickDays->value()){// 8 - 3 количество дней для выздоровления
-                if(rand()%10 < m_mortality_rate){//коэффициент мсертности
+                if(rand()%10 < m_mortality_rate){//!коэффициент мсертности
                     Vec_Item[i]->dead();
                     Vec_Item[i]->day_sick=0;
                     countDead++;
@@ -284,18 +285,18 @@ std::string readFile(const std::string& fileName) {
     return ss.str();
 }
 
-//загрузка на сцену графа из файла
+//!загрузка на сцену графа из файла
 void StartWidget::loadfile(const std::string& URL){
 
-    //создание векторов вершин, ребер и текста для дальнейшего заполнения
+    //!создание векторов вершин, ребер и текста для дальнейшего заполнения
     std::vector<Vertices> m_ver; std::vector<Edges> m_edg;
 
-    if(URL.substr(URL.find_last_of(".") + 1) == "graph") //определение расширения файла и парсинг файла *.graph
+    if(URL.substr(URL.find_last_of(".") + 1) == "graph") //!определение расширения файла и парсинг файла *.graph
     {
         std::ifstream i(URL);
         nlohmann::json j;
         i>>j;
-        //парсинг с помощью библиотеки nlohmann vertices,texts,edges
+        //!парсинг с помощью библиотеки nlohmann vertices,texts,edges
         nlohmann::json vertices  = j["vertices"];
         for(size_t i=0; i< vertices.size();i++){
             int x =vertices[i]["x"]; int y =vertices[i]["y"];std::string name =vertices[i]["name"];
@@ -355,12 +356,12 @@ void StartWidget::loadfile(const std::string& URL){
             QString qstr = QString::fromStdString(s);
             G = agmemread(s.c_str());
 
-            //расположение графа
+            //!расположение графа
             QString tmpQ = Boxlayout->currentText();
             const char* tmp = tmpQ.toStdString().c_str();
             gvLayout(gvc, G, tmp); // dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi
 
-            //создание узлов и ребер
+            //!создание узлов и ребер
             Agnode_t* n;
             Agedge_t* e;
             int id = 0;
@@ -376,7 +377,7 @@ void StartWidget::loadfile(const std::string& URL){
                 id++;
             }
 
-            //обход всех ребер и заполнение массива ребер m_edg
+            //!обход всех ребер и заполнение массива ребер m_edg
             Agnode_t* n_;
             int count =0;
             for (n_ = agfstnode(G); n_; n_ = agnxtnode(G,n_)) {
@@ -392,33 +393,33 @@ void StartWidget::loadfile(const std::string& URL){
                 }
             }
 
-            //очиста ресурсов компьютера
+            //!очиста ресурсов компьютера
             gvFreeLayout(gvc, G);
             agclose(G);
             gvFreeContext(gvc);
         }
 
 
-    //создание логического графа
+    //!создание логического графа
     std::pair<std::vector<Edges>,std::vector<Vertices>> mas_tmp;
     mas_tmp.first = m_edg;
     mas_tmp.second = m_ver;
 
-    //очистка старой сцены
+    //!очистка старой сцены
     scen->clear();
 
-    //добавление нового графа на сцену
+    //!добавление нового графа на сцену
     addScengraph(mas_tmp);
 
-    //создание сцены размером с левого до правого конца графа и с нижнего до верхнего
+    //!создание сцены размером с левого до правого конца графа и с нижнего до верхнего
     std::vector<std::pair<int,int>> mas =findMinPointMaxPoint(mas_tmp);
     int len_x =mas[0].second-mas[0].first; int len_y = mas[1].second-mas[1].first; int min_x =mas[0].first; int min_y =mas[1].first;
     scen->setSceneRect(min_x,min_y,len_x,len_y);
 
-    //убираем старое представление
+    //!убираем старое представление
     view->resetTransform();
 
-    //скалирует изображение в зависимости от размеров окна
+    //!скалирует изображение в зависимости от размеров окна
     qreal size_x = view->width();
     qreal size_y =view->height();
     qreal scale = std::min((size_x/len_x),(size_y/len_y));
@@ -431,7 +432,7 @@ void StartWidget::loadfile(const std::string& URL){
 }
 
 
-//создание ребра по начальной ,конечной точке и выбор стиля ребра
+//!создание ребра по начальной ,конечной точке и выбор стиля ребра
 QGraphicsLineItem* StartWidget::CreateItamEdges(const int& x1,const int& y1,
                                             const int& x2,const int& y2,
                                             const QPen& pen){
@@ -449,7 +450,7 @@ MyItem->setBrush(brush);
 return MyItem;
 }
 
-//нахождения минимальных и максимальных точке на графе (чтобы потом его отцентровывать и масштабировать)
+//!нахождения минимальных и максимальных точке на графе (чтобы потом его отцентровывать и масштабировать)
 std::vector<std::pair<int,int>> StartWidget::findMinPointMaxPoint(
          std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
     std::vector<std::pair<int,int>> final;
@@ -491,7 +492,7 @@ void StartWidget::parseTgf(const std::string &URL, std::vector<std::string>& edg
                 int j = 0;
                 while (std::getline(Str_tmp, str_t, ' ')) {
                     if(j==0){
-                        //для названия вершин заполняю их имена
+                        //!для названия вершин заполняю их имена
                         std::string name = str_t;
                         edges_name.push_back(name);
                     }
@@ -510,7 +511,7 @@ void StartWidget::parseTgf(const std::string &URL, std::vector<std::string>& edg
                 std::string str_t ="";
                 std::vector<size_t> vec_edge;
                 while (std::getline(Str_tmp, str_t,' ')) {
-                    //заполняю массив ребер
+                    //!заполняю массив ребер
                     size_t edge = std::stoi(str_t);
                     vec_edge.push_back(edge);
                 }
@@ -521,7 +522,7 @@ void StartWidget::parseTgf(const std::string &URL, std::vector<std::string>& edg
     }
 }
 
-//добавление графа на сцену
+//!добавление графа на сцену
 void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices>>& mas){
     int font_size=view->width()/200;
     //qreal font_size = 0.75/3;
@@ -537,7 +538,7 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
         //MyItem->setFlags(QGraphicsItem::ItemIsMovable); //возможная добавка перемещения ребра
     }
 
-    //создание логического списка смежности
+    //!создание логического списка смежности
     std::vector<std::vector<Vertices>> tmp;
     tmp.resize(mas.second.size());
     adjacency_list.resize(mas.second.size());
@@ -548,8 +549,8 @@ void StartWidget::addScengraph(std::pair<std::vector<Edges>,std::vector<Vertices
 
     adjacency_list.resize(mas.second.size());
     Vec_Item.resize(mas.second.size());
-    //создание узлов графа и заполнение списка смежности
-    //можно было заолнить список через itamAt но он возвращает QGraphicsItem* из-за чего вызвать sick() нельзя
+    //!создание узлов графа и заполнение списка смежности
+    //!можно было заолнить список через itamAt но он возвращает QGraphicsItem* из-за чего вызвать sick() нельзя
     for (size_t i = 0; i < mas.second.size(); ++i) {
         if(mas.second[i].get_m_name()==""){
             MyQGraphicsRectItem* MyItem = CreateMyItamVerties(mas.second[i].get_x(),
@@ -654,3 +655,4 @@ void StartWidget::onButtonRepeat(){
 void StartWidget::ChangeTimer(int step){
     stepTimer->setInterval(step);
 }
+///\endcode

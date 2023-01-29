@@ -1,13 +1,13 @@
 #include "myqgraphicsrectiten.h"
 
-//конструктор вершины
+//!конструктор вершины
 MyQGraphicsRectItem::MyQGraphicsRectItem(const qreal& x,const qreal& y,const int& r){
     this->m_x = x;
     this->m_y = y;
     this->r = r;
 }
 
-//отрисовка вершины
+//!отрисовка вершины
 void MyQGraphicsRectItem::paint(QPainter* painter,
                   const QStyleOptionGraphicsItem* option, QWidget* widget){
     if(m_dead){
@@ -31,12 +31,12 @@ void MyQGraphicsRectItem::paint(QPainter* painter,
         }
     }
 
-    //маеросы того, что option, widget не используются
+    //!макросы того, что option, widget не используются
     Q_UNUSED(option);
     Q_UNUSED(widget);
 }
 
-//выделение отбасти для вершины
+//!выделение отбасти для вершины
 QRectF MyQGraphicsRectItem::boundingRect() const {
     return QRectF(m_x-r,m_y-r,2*r,2*r);
 }
@@ -61,6 +61,8 @@ void MyQGraphicsRectItem::advance(int phase){
     }
 }
 
+//!часть кода работающая с логической болезнью
+//!\code
 bool MyQGraphicsRectItem::isSick(){
     return (m_sick==true);
 }
@@ -112,3 +114,4 @@ void MyQGraphicsRectItem::unrecovered(){
     this->m_infected = false;
     this->m_sick = false;
 }
+//!\endcode

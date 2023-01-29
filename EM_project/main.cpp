@@ -20,9 +20,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    //!создание объекта моего проекта и отобрадение его в полный экран
     EM_proj main;
-    //main.resize(800,600);
-    main.showFullScreen();
+    main.show();
+    //main.showFullScreen();
 
 
     return a.exec();

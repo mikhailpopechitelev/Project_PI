@@ -7,6 +7,7 @@ MyGraphicsView::MyGraphicsView(QGraphicsScene* scen,QWidget* parent)
     this->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
+//!переопределение метода прокрутки колесика для мышки на графической сцене
 void MyGraphicsView::wheelEvent(QWheelEvent* event)
 {
     if(event->modifiers()& Qt::ControlModifier){

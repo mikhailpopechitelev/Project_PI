@@ -109,6 +109,7 @@ public slots:
 private:
 
     //!поля стартовой настройки симуляции
+    ///\code
     int countDead=0;
     int daySimulation = 0;
     QLabel* countDay = nullptr;
@@ -141,7 +142,7 @@ private:
     int m_health_efficiency=0;
     int m_distribution_с=0;
     std::string URL= "";
-
+    ///\endcode
 };
 
 #endif // STARTWIDGET_H

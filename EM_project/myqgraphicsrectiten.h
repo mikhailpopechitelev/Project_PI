@@ -92,6 +92,7 @@ signals:
 
 private:
     //!поля узла
+    //! \code
     bool m_infected = false;
     bool m_dead = false;
     bool m_recover = false;
@@ -99,6 +100,7 @@ private:
     qreal m_x=0;
     qreal m_y=0;
     int r =0;
+    ///\endcode
 };
 
 #endif // MYQGRAPHICSRECTITEN_H
